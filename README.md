@@ -8,13 +8,13 @@
 
 **不需要账号，不需要服务器，不联网。**
 
-[![Release](https://img.shields.io/github/v/release/qjiang357159/Gaze?style=flat-square)](https://github.com/qjiang357159/Gaze/releases)
+[![Release](https://img.shields.io/github/v/release/CyanRiverX/Gaze?style=flat-square)](https://github.com/CyanRiverX/Gaze/releases)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Android-3ddc84?style=flat-square)
 ![minSdk](https://img.shields.io/badge/minSdk-24-orange?style=flat-square)
 ![No Internet](https://img.shields.io/badge/permissions-no%20internet-success?style=flat-square)
 
-**下载**：[前往 Releases](https://github.com/qjiang357159/Gaze/releases) 获取最新 APK
+**下载**：[前往 Releases](https://github.com/CyanRiverX/Gaze/releases) 获取最新 APK
 
 </div>
 
