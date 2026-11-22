@@ -1368,7 +1368,7 @@ private fun RestoreDialog(
 // ==================================================================== 关于
 
 /** 项目主页。写死在代码里 —— 它不随构建环境变化，也不该从网络取。 */
-private const val PROJECT_URL = "https://github.com/qjiang357159/Gaze"
+private const val PROJECT_URL = "https://github.com/CyanRiverX/Gaze"
 
 @Composable
 fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
@@ -1391,7 +1391,7 @@ fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
             // 发 Intent 的是系统浏览器，不是 Gaze。
             ActionRow(
                 label = "在 GitHub 上查看源码",
-                subtitle = "qjiang357159/Gaze",
+                subtitle = "CyanRiverX/Gaze",
                 onClick = { context.openUrl(PROJECT_URL) }
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
