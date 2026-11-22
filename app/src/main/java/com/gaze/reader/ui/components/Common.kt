@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -641,4 +642,81 @@ private fun BackToTopButton(
             )
         }
     }
+}
+
+// ==================================================================== 滚动锚点
+
+/**
+ * 记住「当前顶上看的是哪一项」，列表重新排序后回到它所在的位置。
+ *
+ * 解决的是这样一个 bug：改排序方式时数据集整体重排，但 `LazyListState`
+ * 记的是**下标**（`firstVisibleItemIndex`），下标本身没有变过 ——
+ * 于是视口停在一个完全无关的位置上，用户看到的是页面「乱跳」。
+ *
+ * 做法是盯住当前首个可见项的 [key]（就是 `items(key = …)` 里的那个 id），
+ * 排序变化后到 [keys]（**新顺序的键序列**）里重新查它的下标，再滚过去。
+ *
+ * 几个必要的细节：
+ *
+ * - **换算必须用新数据列表**。不能读 `state.layoutInfo`：重排之后那里的
+ *   `visibleItemsInfo` 已经是新数据、老下标，锚点项常常根本不在可见范围内。
+ * - **只在排序真的变了的时候动**。数据增长（扫描进新书）、搜索过滤都会让
+ *   序列变化，但那些时候用户不该被拽走 —— 尤其扫描时每导入一本就回流一次。
+ * - **不记像素偏移**：排序后卡片高度分布会变，硬追 offset 会落到半屏。
+ * - **锚点项不存在时（被过滤掉了）安静退出**，不要退回顶部 ——
+ *   那是用户自己删/搜导致的，跳顶反而突兀。
+ */
+@Composable
+fun rememberGridSortAnchor(
+    state: LazyGridState,
+    sortKey: Any?,
+    keys: List<Any>
+): LazyGridState {
+    var anchorKey by remember { mutableStateOf<Any?>(null) }
+    var knownSort by remember { mutableStateOf(sortKey) }
+
+    // 首次组合与每次滚动都记一次锚点：用户停在哪一屏，锚点就是那一屏的第一项。
+    LaunchedEffect(state) {
+        snapshotFlow { state.firstVisibleItemIndex }
+            .collect { anchorKey = state.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+    }
+
+    LaunchedEffect(sortKey, keys) {
+        val previous = knownSort
+        knownSort = sortKey
+        // 第一帧 sortKey 就是初值，此时什么都没变，不该动。
+        if (previous === sortKey) return@LaunchedEffect
+        val target = anchorKey ?: return@LaunchedEffect
+        val index = keys.indexOf(target)
+        if (index >= 0) state.scrollToItem(index)
+    }
+    return state
+}
+
+/**
+ * [rememberGridSortAnchor] 的列表版本。
+ */
+@Composable
+fun rememberListSortAnchor(
+    state: LazyListState,
+    sortKey: Any?,
+    keys: List<Any>
+): LazyListState {
+    var anchorKey by remember { mutableStateOf<Any?>(null) }
+    var knownSort by remember { mutableStateOf(sortKey) }
+
+    LaunchedEffect(state) {
+        snapshotFlow { state.firstVisibleItemIndex }
+            .collect { anchorKey = state.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+    }
+
+    LaunchedEffect(sortKey, keys) {
+        val previous = knownSort
+        knownSort = sortKey
+        if (previous === sortKey) return@LaunchedEffect
+        val target = anchorKey ?: return@LaunchedEffect
+        val index = keys.indexOf(target)
+        if (index >= 0) state.scrollToItem(index)
+    }
+    return state
 }

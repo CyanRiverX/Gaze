@@ -1,5 +1,7 @@
 package com.gaze.reader.ui.screens
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -299,7 +301,7 @@ fun ReadingSettingsScreen(
         onBack = onBack
     ) {
         SettingsSection("默认阅读", icon = GazeIcons.Book) {
-            SettingsNote("这里是全局默认。在阅读页单独改过的漫画会记住自己的设置，不受影响。")
+            SettingsNote("这里是全局默认；在阅读页单独改过的漫画会记住自己的设置。")
             ChoiceRow(
                 label = "阅读模式",
                 options = ReadMode.entries.map { it.key to it.label },
@@ -326,7 +328,7 @@ fun ReadingSettingsScreen(
         }
 
         SettingsSection("阅读器背景", icon = GazeIcons.Brightness) {
-            SettingsNote("与系统主题独立 —— 白天用浅色系统，阅读时照样可以用黑底。")
+            SettingsNote("与系统主题独立，阅读时照样可以用黑底。")
             ChoiceRow(
                 label = "漫画背景",
                 options = ReaderBackground.entries.map { it.key to it.label },
@@ -418,6 +420,7 @@ fun LibrarySettingsScreen(
     onSetLibraryView: (LibraryView) -> Unit,
     onSetLibraryLayout: (LibraryLayout) -> Unit,
     onSetSortOrder: (SortOrder) -> Unit,
+    onSetGroupBySubfolder: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
     SettingsPage(
@@ -433,6 +436,12 @@ fun LibrarySettingsScreen(
                 selected = settings.libraryView.key,
                 onSelect = { onSetLibraryView(LibraryView.of(it)) }
             )
+            ToggleRow(
+                label = "按子文件夹分类",
+                checked = settings.groupBySubfolder,
+                onChange = onSetGroupBySubfolder,
+                hint = "开启后，每个含漫画的子文件夹各自成为一个书架文件夹。"
+            )
         }
 
         SettingsSection("排版", icon = GazeIcons.list(true)) {
@@ -445,7 +454,7 @@ fun LibrarySettingsScreen(
         }
 
         SettingsSection("排序", icon = GazeIcons.TextLines) {
-            SettingsNote("「名称 A-Z」按自然数字顺序 —— 第 2 卷排在第 10 卷前面，而不是按字符比较。")
+            SettingsNote("「名称 A-Z」按自然数字顺序：「第 2 卷」排在「第 10 卷」前面。")
             ChoiceRow(
                 label = "默认排序",
                 options = SortOrder.entries.map { it.key to it.label },
@@ -534,8 +543,8 @@ fun MediaSettingsScreen(
         if (pendingFolders.isNotEmpty()) {
             SettingsSection("待重新授权的文件夹", icon = GazeIcons.Info) {
                 SettingsNote(
-                    "这些目录来自一份恢复回来的备份。备份文件里存不下 SAF 读权限，" +
-                        "所以它们还不是已授权状态 —— 重新点一次目录选择器，它们就能照常扫描。"
+                    "这些目录来自一份恢复回来的备份，还不是已授权状态。备份里存不下 SAF 读权限，" +
+                        "重新点一次目录选择器即可。"
                 )
                 pendingFolders.forEach { folder ->
                     PendingFolderRow(
@@ -551,8 +560,7 @@ fun MediaSettingsScreen(
         if (missingCount > 0) {
             SettingsSection("媒体匹配", icon = Icons.Default.Warning) {
                 SettingsNote(
-                    "$missingCount 本漫画在本机找不到对应文件。阅读进度、收藏和标签都还留着，" +
-                        "重新指定文件位置就能接回来。"
+                    "$missingCount 本漫画在本机找不到对应文件，进度、收藏和标签都还留着。"
                 )
                 ActionRow(
                     label = "去媒体匹配",
@@ -573,7 +581,7 @@ fun MediaSettingsScreen(
                 label = "启动时自动增量扫描",
                 checked = settings.autoScanOnLaunch,
                 onChange = onSetAutoScan,
-                hint = "后台进行，只在书架顶部显示进度，不会弹提示打断你。"
+                hint = "后台进行，只在书架顶部显示进度。"
             )
         }
 
@@ -805,9 +813,8 @@ fun NamingSettingsScreen(
     SettingsPage(title = "文件名解析", onBack = onBack) {
         SettingsSection("说明", icon = GazeIcons.Info) {
             SettingsNote(
-                "漫画的文件命名非常混乱，很难建立通用的识别规则。下面两条规则只是" +
-                    "开发者个人的命名习惯，不一定对得上你的文件 —— 建议以手动改书名、" +
-                    "作者为主，自动解析只当作兜底。"
+                "漫画的文件命名五花八门，下面两条规则只是常见约定，不一定对得上你的文件。" +
+                    "建议以手动改书名、作者为主，自动解析只当兜底。"
             )
         }
 
@@ -837,7 +844,7 @@ fun NamingSettingsScreen(
                 label = "启用括号识别",
                 checked = settings.parseAuthorByBracket,
                 onChange = onSetParseByBracket,
-                hint = "文件名中第一对括号里的内容识别为作者。两条规则都启用时，以括号为准。"
+                hint = "文件名中第一对括号里的内容识别为作者；两条规则都启用时以括号为准。"
             )
             if (settings.parseAuthorByBracket) {
                 Hairline(Modifier.padding(start = SettingsRowInset))
@@ -1029,14 +1036,9 @@ fun BackupSettingsScreen(
 
     SettingsPage(title = "备份与恢复", onBack = onBack) {
         SettingsSection("说明", icon = GazeIcons.Info) {
+            SettingsNote("备份只含元数据（进度、收藏、标签、设置），不含漫画原文件。")
             SettingsNote(
-                "备份只包含元数据 —— 阅读进度、收藏、标签与标签顺序、文件夹归属、" +
-                    "书架封面、阅读统计、全部设置。不复制漫画原文件，否则几百 GB 的漫画库" +
-                    "会让备份大到没法用。"
-            )
-            SettingsNote(
-                "文件夹授权是唯一带不过去的东西：SAF 的读权限绑定在「你亲自点过一次目录选择器」" +
-                    "这件事上，备份文件里存不下。恢复后需要你重新授权一次才能继续扫描。"
+                "文件夹授权带不过去：恢复后需要重新授权一次目录，才能继续扫描。"
             )
         }
 
@@ -1365,15 +1367,15 @@ private fun RestoreDialog(
 
 // ==================================================================== 关于
 
+/** 项目主页。写死在代码里 —— 它不随构建环境变化，也不该从网络取。 */
+private const val PROJECT_URL = "https://github.com/qjiang357159/Gaze"
+
 @Composable
-fun AboutSettingsScreen(onBack: () -> Unit) {
-    val colors = gazeColors
+fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
+    val context = LocalContext.current
     SettingsPage(title = "关于 Gaze", onBack = onBack) {
         SettingsSection("简介", icon = GazeIcons.Info) {
-            SettingsNote(
-                "Gaze 是一款完全本地的漫画阅读器。不登录、不注册、不上传，" +
-                    "安装包里没有任何网络权限。漫画库属于你的私人数据。"
-            )
+            SettingsNote("完全本地的漫画阅读器。不登录、不上传，安装包里没有任何网络权限。")
             StatRow("版本", BuildConfig.VERSION_NAME)
             StatRow("开发者", "萧雨")
             StatRow(
@@ -1384,9 +1386,52 @@ fun AboutSettingsScreen(onBack: () -> Unit) {
             )
         }
 
-        SettingsSection("更新日志", icon = GazeIcons.TextLines) {
-            CHANGELOG.forEach { release ->
-                Column(Modifier.fillMaxWidth().padding(horizontal = SettingsRowInset, vertical = 8.dp)) {
+        SettingsSection("项目", icon = GazeIcons.Shelf) {
+            // App 没有 INTERNET 权限，但「跳出去把地址交给浏览器」不需要网络权限 ——
+            // 发 Intent 的是系统浏览器，不是 Gaze。
+            ActionRow(
+                label = "在 GitHub 上查看源码",
+                subtitle = "qjiang357159/Gaze",
+                onClick = { context.openUrl(PROJECT_URL) }
+            )
+            Hairline(Modifier.padding(start = SettingsRowInset))
+            ActionRow(
+                label = "更新日志",
+                subtitle = "全部版本的改动记录",
+                onClick = onOpenChangelog
+            )
+        }
+
+        SettingsSection("隐私", icon = GazeIcons.Info) {
+            SettingsNote("未申请 INTERNET 权限。不联网、不上传、不收集统计。")
+        }
+    }
+}
+
+/**
+ * 更新日志二级页。
+ *
+ * 内容其实不长，但放在「关于」里会把简介和隐私挤到很远 —— 十几版叠起来
+ * 是一屏半。抽出来之后，关于页只剩「这软件是什么、在哪看源码」两件事。
+ *
+ * 每条只写**用户能感知到的结果**，说明性的细节留在 GitHub Release 正文里。
+ */
+@Composable
+fun ChangelogScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
+    SettingsPage(
+        title = "更新日志",
+        subtitle = "当前 ${BuildConfig.VERSION_NAME}",
+        onBack = onBack
+    ) {
+        SettingsSection("版本记录", icon = GazeIcons.TextLines) {
+            CHANGELOG.forEachIndexed { index, release ->
+                if (index > 0) Hairline(Modifier.padding(start = SettingsRowInset))
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = SettingsRowInset, vertical = 10.dp)
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = release.version,
@@ -1398,13 +1443,13 @@ fun AboutSettingsScreen(onBack: () -> Unit) {
                             Box(
                                 Modifier
                                     .clip(RoundedCornerShape(2.dp))
-                                    .background(colors.accent.copy(alpha = 0.14f))
+                                    .background(gazeColors.accent.copy(alpha = 0.14f))
                                     .padding(horizontal = 6.dp, vertical = 1.dp)
                             ) {
                                 Text(
                                     text = "当前",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = colors.accent
+                                    color = gazeColors.accent
                                 )
                             }
                         }
@@ -1415,28 +1460,40 @@ fun AboutSettingsScreen(onBack: () -> Unit) {
                             Text(
                                 text = "·",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = colors.inkFaint,
+                                color = gazeColors.inkFaint,
                                 modifier = Modifier.width(10.dp)
                             )
                             Text(
                                 text = item,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = colors.inkFaint
+                                color = gazeColors.inkFaint
                             )
                         }
                     }
                 }
-                Hairline(Modifier.padding(start = SettingsRowInset))
             }
         }
 
-        SettingsSection("隐私", icon = GazeIcons.Info) {
-            SettingsNote(
-                "Gaze 不申请 INTERNET 权限 —— 这不是「不使用网络」，而是装不了任何网络代码。" +
-                    "所有解析、解码、统计都在本机完成。"
+        SettingsSection("更多", icon = GazeIcons.Info) {
+            ActionRow(
+                label = "查看完整更新说明",
+                subtitle = "GitHub Release 页面",
+                onClick = { context.openUrl("$PROJECT_URL/releases") }
             )
         }
     }
+}
+
+/**
+ * 把地址交给外部浏览器打开。
+ *
+ * 刻意不吞异常：真机上正常都装有浏览器，但万一没有，
+ * 直接崩不如什么都不做 —— 所以兜一层 `ActivityNotFoundException`。
+ */
+private fun Context.openUrl(url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { startActivity(intent) }
 }
 
 private data class ReleaseNote(val version: String, val items: List<String>)
@@ -1444,109 +1501,108 @@ private data class ReleaseNote(val version: String, val items: List<String>)
 /**
  * 更新日志。
  *
- * 刻意写得**短**：每条压在一行以内，只说用户能感知到的结果，
- * 不写实现细节（「不再用 RGB_565」「采样率不低于显示尺寸」这种话
- * 对用户没有任何意义）。更早的版本进一步合并成一句，
- * 更新日志是给人扫的，不是给人读的。
+ * 每条只压一行、只说用户能感知到的**结果**。实现细节（「不再用 RGB_565」
+ * 「采样率不低于显示尺寸」）对用户没有意义，完整说明留在 GitHub Release 正文。
  */
 private val CHANGELOG = listOf(
     ReleaseNote(
+        version = "1.7.4",
+        items = listOf(
+            "文件夹视图可按子文件夹分类：每个含漫画的子目录各自成为一个书架文件夹",
+            "默认主题改为「灰蓝」（仅影响全新安装，已选过的主题不变）",
+            "修复切换排序后书架、标签页会跳到不相干的位置",
+            "关于页新增 GitHub 源码地址，更新日志移到独立页面",
+            "清理了设置页里过长、过细的说明文字"
+        )
+    ),
+    ReleaseNote(
         version = "1.7.3",
         items = listOf(
-            "新增点击翻页：横向点左三分之一上一页、右三分之一下一页，纵向连续模式点上方上一张、下方下一张",
-            "中间三分之一切换控件栏；抬手即翻，配短促的缓动滑动（默认开启，可关）",
-            "详情页可以更换封面：从这本漫画里挑一页，或者用本机的图片",
-            "标签详情页的排版改为跟随书架的视图设置，不再固定成一种网格",
-            "更换封面后书架的封面会立刻刷新"
+            "新增点击翻页",
+            "单击中间切换控件栏，抬手即翻",
+            "详情页可更换封面",
+            "标签详情页跟随书架的排版设置"
         )
     ),
     ReleaseNote(
         version = "1.7.2",
         items = listOf(
-            "修复长按拖动标签排序时，拖到两个标签的交界处会疯狂闪动、失控",
-            "拖动排序改为按格子定位，抓在卡片边缘和抓在中间换位时机一致"
+            "修复拖动标签排序时在交界处闪动失控",
+            "拖动排序改为按格子定位"
         )
     ),
     ReleaseNote(
         version = "1.7.1",
         items = listOf(
-            "修复「先恢复备份、再授权扫描」时标签与阅读进度丢失 —— 扫描现在会把备份留下的记录直接接回文件，而不是另建一条新的",
-            "扫描时自动合并此前产生的重复记录：历史数据会并回保留的那条，不留空壳",
-            "媒体匹配改为按原文件夹分组，点进文件夹才看具体是哪几本",
-            "手动重新定位时，如果指到的文件本来就在库里，改为合并历史数据而不是产生重复"
+            "修复恢复备份后标签与阅读进度丢失",
+            "扫描时自动合并重复记录",
+            "媒体匹配改为按文件夹分组",
+            "重新定位时改为合并历史数据"
         )
     ),
     ReleaseNote(
         version = "1.7.0",
         items = listOf(
-            "新增「媒体匹配」：恢复备份后找不到文件的漫画会列在这里，可以手动重新定位，也可以让 Gaze 自己扫一遍按内容接回",
-            "恢复备份不再把备份里记录的文件夹当成已授权，改为「待重新授权」，重新指一次目录即可继续扫描",
-            "修复恢复备份后漫画上的标签丢失",
-            "备份补全了此前漏掉的字段：标签顺序、文件夹归属、容器格式、手动改过的标题与作者、书架封面、阅读统计",
-            "修复标签页上下滑动时容易误点进标签详情"
+            "新增「媒体匹配」，可手动重新定位丢失的文件",
+            "恢复备份不再把文件夹当作已授权，改为待重新授权",
+            "修复恢复备份后标签丢失",
+            "备份补全标签顺序、文件夹归属、阅读统计等字段",
+            "修复标签页滑动时误点"
         )
     ),
     ReleaseNote(
         version = "1.6.0",
         items = listOf(
-            "标签支持长按拖动排序，顺序会被记住（长按不动仍是批量管理）",
-            "修复书架文件夹里返回会直接退出应用",
-            "修复从阅读页返回会掉回书架首页、而不是刚才那个文件夹",
-            "修复新建标签时选的颜色被自动推荐色顶掉",
-            "搜索框右侧新增说明：多个条件用空格分开"
+            "标签支持长按拖动排序",
+            "修复书架文件夹里返回会退出应用",
+            "修复从阅读页返回掉回书架首页",
+            "修复新建标签的颜色被顶掉"
         )
     ),
     ReleaseNote(
         version = "1.5.1",
         items = listOf(
-            "修复备份文件无法从文件管理器「打开方式」导入",
-            "标签页「收藏」移到顶部独立区域，没有标签时也不再消失",
-            "设置二级页统一左边缘，选项改为等宽网格"
+            "修复备份文件无法从「打开方式」导入",
+            "「收藏」移到标签页顶部独立区域",
+            "设置二级页统一左边缘"
         )
     ),
     ReleaseNote(
         version = "1.5.0",
         items = listOf(
-            "标签页改为两列卡片，一屏能看到约两倍的标签",
-            "「收藏」同样以卡片并入标签网格",
-            "文件名解析重做：分隔符与括号两类规则可分别启用",
-            "备份文件支持从文件管理器「打开方式」直接导入",
-            "「概览」「阅读统计」移到设置页「阅读」分组",
-            "退出阅读页的转场不再割裂，状态栏也不再泛白"
+            "标签页改为两列卡片",
+            "「收藏」并入标签网格",
+            "文件名解析重做：分隔符与括号分别启用",
+            "备份支持从「打开方式」导入",
+            "「概览」「阅读统计」移到设置页"
         )
     ),
     ReleaseNote(
         version = "1.4.0",
         items = listOf(
-            "新增 PDF 与 EPUB 支持，可直接加入书架阅读",
-            "PDF 按屏幕像素重新绘制，放大到几倍都不糊",
-            "PDF / EPUB 支持目录跳转，也可输入页码直达",
-            "EPUB 文字章节跟随阅读器背景与配色",
-            "设置页改为分组卡片，各二级页补齐卡片与折行选项",
-            "长页面滚动条可拖动，并新增「返回顶部」",
-            "预设主题色补到 8 套，新增「紫檀」",
-            "书架视图「全部」换成独立图标"
+            "新增 PDF 与 EPUB 支持",
+            "PDF 支持目录跳转与页码直达",
+            "设置页改为分组卡片",
+            "长页面滚动条可拖动，新增「返回顶部」",
+            "预设主题补到 8 套"
         )
     ),
     ReleaseNote(
         version = "1.3.1",
         items = listOf(
-            "修复点进标签页「收藏」会闪退",
-            "设置页重做：一栏一卡，去掉重复图标与大片留白",
-            "主题与配色改为色卡网格，预设色铺满整行",
-            "阅读器背景移到「阅读行为」，阅读页菜单里也能直接改",
-            "阅读页控件与状态栏配色跟随阅读器背景",
-            "页面转场从 700ms 缩短到 180ms",
-            "说明文字里多余的星号已清理"
+            "修复点进「收藏」会闪退",
+            "设置页重做为一栏一卡",
+            "主题改为色卡网格",
+            "页面转场从 700ms 缩短到 180ms"
         )
     ),
     ReleaseNote(
         version = "1.3.0",
         items = listOf(
-            "按原图分辨率渲染：放大时只解可见区域，超长条漫分块只为省内存",
-            "阅读页不再自动沉浸，点一下才全屏",
-            "书架视图 / 排版 / 排序会记住，重启不再回到默认",
-            "标签长按可批量管理；「收藏」独立成一页",
+            "按原图分辨率渲染，放大不糊",
+            "阅读页不再自动沉浸",
+            "书架视图 / 排版 / 排序会被记住",
+            "标签支持长按批量管理",
             "长列表加入细滚动条"
         )
     ),
@@ -1554,22 +1610,23 @@ private val CHANGELOG = listOf(
         version = "1.2.0",
         items = listOf(
             "设置拆成二级页",
-            "6 套纸张主题，并支持自定义主色",
-            "阅读页新增旋转 / 亮度 / 渲染模式 / 音量键翻页 / 常亮 / 页码",
-            "书架视图与排版扩展，支持自定义书架封面",
-            "备份支持指定文件夹、自动备份与恢复"
+            "6 套纸张主题，支持自定义主色",
+            "阅读页新增旋转 / 亮度 / 音量键翻页 / 页码",
+            "支持自定义书架封面",
+            "新增备份与自动备份"
         )
     ),
     ReleaseNote(
         version = "1.1.0",
         items = listOf(
             "新增阅读统计",
-            "坏页可重试或跳过；扩展元数据；文件名解析可配置"
+            "坏页可重试或跳过",
+            "文件名解析可配置"
         )
     ),
     ReleaseNote(
         version = "1.0.1",
-        items = listOf("修复封面蒙纱、顶栏重叠、扫描提示反复弹出等首批问题")
+        items = listOf("修复封面蒙纱、顶栏重叠、扫描提示反复弹出")
     ),
     ReleaseNote(
         version = "1.0.0",

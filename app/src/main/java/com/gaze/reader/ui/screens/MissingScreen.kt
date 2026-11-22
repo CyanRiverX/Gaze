@@ -131,10 +131,7 @@ fun MissingScreen(
         if (state.groups.isEmpty()) {
             SettingsSection("状态", icon = GazeIcons.Info) {
                 SettingsNote("所有漫画都能在本机找到对应文件。")
-                SettingsNote(
-                    "恢复备份之后，如果某些漫画找不到文件，它们会出现在这里 —— " +
-                        "阅读进度、收藏和标签都完整保留，只是暂时没指到文件。"
-                )
+                SettingsNote("恢复备份后找不到文件的漫画会出现在这里，进度、收藏和标签都保留。")
             }
         } else if (opened != null) {
             GroupDetail(
@@ -212,18 +209,15 @@ private fun GroupList(
 ) {
     SettingsSection("这一页在做什么", icon = GazeIcons.Info) {
         SettingsNote(
-            "这些漫画的记录都还在 —— 阅读进度、收藏、标签一样没少，" +
-                "只是指向的文件在本机找不到了。\n\n" +
-                "「重新定位」由你手动指文件；「扫描并自动匹配」让 Gaze 自己按内容找。" +
-                "两者都是把历史数据接回原记录，不会新建空壳。"
+            "这些漫画的记录都还在，只是指向的文件在本机找不到了。\n" +
+                "「重新定位」由你手动指文件；「扫描并自动匹配」由 Gaze 自己按内容找。"
         )
     }
 
     if (state.orphanFolders.isNotEmpty()) {
         SettingsSection("需要重新授权", icon = GazeIcons.Folder) {
             SettingsNote(
-                "备份带回来的文件夹没法自动恢复读权限 —— 系统只认「你亲自点过一次目录选择器」。\n" +
-                    "重新授权一次，它们名下的漫画才可能被扫描接回来。"
+                "备份带回来的文件夹没法自动恢复读权限，需要你重新点一次目录选择器。"
             )
             state.orphanFolders.forEach { folder ->
                 StatRow(folder.displayName, UriDisplay.readable(folder.uri), stacked = true)
@@ -249,7 +243,7 @@ private fun GroupList(
     }
 
     SettingsSection("待重新定位（${state.total} 本）", icon = Icons.Default.Warning) {
-        SettingsNote("按原文件夹分组 —— 点进一组能看到具体是哪些漫画，并逐条重新定位。")
+        SettingsNote("按原文件夹分组，点进一组可以逐条重新定位。")
         state.groups.forEach { group ->
             GroupRow(group = group, onClick = { onOpen(group) })
             Hairline(Modifier.padding(start = SettingsRowInset))
@@ -326,17 +320,14 @@ private fun GroupDetail(
 ) {
     SettingsSection(group.title, icon = GazeIcons.Folder) {
         SettingsNote(
-            "这 ${group.count} 本都来自同一个目录。记录都在 —— 阅读进度、收藏、标签一样没少，" +
-                "只是文件在本机找不到了。"
+            "这 ${group.count} 本都来自同一个目录，记录都还在，只是文件在本机找不到了。"
         )
         group.uri?.let { uri ->
             StatRow("原位置", UriDisplay.readable(uri))
             Hairline(Modifier.padding(start = SettingsRowInset))
         }
         if (group.pending) {
-            SettingsNote(
-                "这个目录还没重新授权。授权之后点「扫描并自动匹配」，这一组通常能一次接回大半。"
-            )
+            SettingsNote("这个目录还没重新授权。授权后点「扫描并自动匹配」，通常能一次接回大半。")
             AuthorizeRow(label = "重新授权这个目录", onAuthorize = onAuthorize)
         }
         ActionRow(

@@ -136,6 +136,7 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     fun setLibraryView(value: LibraryView) = viewModelScope.launch { container.settingsRepository.setLibraryView(value) }
     fun setLibraryLayout(value: LibraryLayout) = viewModelScope.launch { container.settingsRepository.setLibraryLayout(value) }
     fun setSortOrder(value: SortOrder) = viewModelScope.launch { container.settingsRepository.setSortOrder(value) }
+    fun setGroupBySubfolder(value: Boolean) = viewModelScope.launch { container.settingsRepository.setGroupBySubfolder(value) }
 
     // ------------------------------------------------------------ 文件名解析
 

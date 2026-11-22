@@ -40,7 +40,10 @@ private data class DiscoveredFile(
     val name: String,
     val size: Long,
     val modified: Long,
-    val folderUri: String
+    /** 所属授权根的 tree uri —— 取消授权 / 回写根目录计数都靠它。 */
+    val folderUri: String,
+    /** 相对授权根的子目录路径（`/` 分隔，根目录直属为 null）—— 只服务书架分组。 */
+    val relDir: String?
 )
 
 /**
@@ -252,6 +255,7 @@ class LibraryScanner(
             id = candidate.id,
             uri = file.uri.toString(),
             folderUri = file.folderUri,
+            relDir = file.relDir,
             size = file.size,
             modifiedTime = file.modified,
             fileName = file.name,
@@ -350,7 +354,8 @@ class LibraryScanner(
                 fingerprint = MediaFingerprint.fingerprint(file.name, file.size, pageCount, hash),
                 sampleHash = hash,
                 missing = false,
-                folderUri = file.folderUri
+                folderUri = file.folderUri,
+                relDir = file.relDir
             )
         )
         return true
@@ -370,6 +375,7 @@ class LibraryScanner(
                 pageCount = if (pageCount >= 0) pageCount else existing.pageCount,
                 missing = false,
                 folderUri = file.folderUri,
+                relDir = file.relDir,
                 fingerprint = MediaFingerprint.fingerprint(file.name, file.size, existing.pageCount, hash),
                 sampleHash = hash
             )
@@ -420,15 +426,23 @@ class LibraryScanner(
     private fun discoverFolder(folderUriString: String, out: MutableList<DiscoveredFile>) {
         val treeUri = runCatching { Uri.parse(folderUriString) }.getOrNull() ?: return
         val rootId = runCatching { DocumentsContract.getTreeDocumentId(treeUri) }.getOrNull() ?: return
-        walk(treeUri, rootId, folderUriString, out, 0)
+        walk(treeUri, rootId, folderUriString, out, 0, null)
     }
 
+    /**
+     * 递归遍历。
+     *
+     * [folderUri] 全程保持**授权根**不变（取消授权、根目录计数都靠它），
+     * [relDir] 则逐层累积当前所在的子目录 —— 这两个不能合成一个，
+     * 合成之后「取消授权根目录」就标不到深层记录了。
+     */
     private fun walk(
         treeUri: Uri,
         documentId: String,
         folderUri: String,
         out: MutableList<DiscoveredFile>,
-        depth: Int
+        depth: Int,
+        relDir: String?
     ) {
         if (depth > MAX_DEPTH) return
         val childrenUri = try {
@@ -458,7 +472,9 @@ class LibraryScanner(
                 val mime = if (mimeIdx >= 0) c.getString(mimeIdx) else null
 
                 if (mime == DocumentsContract.Document.MIME_TYPE_DIR) {
-                    walk(treeUri, id, folderUri, out, depth + 1)
+                    // 子目录：把这一层的目录名接到相对路径上
+                    val childRel = if (relDir.isNullOrEmpty()) name else "$relDir/$name"
+                    walk(treeUri, id, folderUri, out, depth + 1, childRel)
                     continue
                 }
                 if (!isArchiveName(name)) continue
@@ -468,7 +484,8 @@ class LibraryScanner(
                     name = name,
                     size = if (sizeIdx >= 0) c.getLong(sizeIdx) else 0L,
                     modified = if (modifiedIdx >= 0) c.getLong(modifiedIdx) else 0L,
-                    folderUri = folderUri
+                    folderUri = folderUri,
+                    relDir = relDir
                 )
             }
         }

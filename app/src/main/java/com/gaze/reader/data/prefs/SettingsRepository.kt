@@ -41,7 +41,8 @@ const val DEFAULT_THEME_SEED: Int = 0xFFB4472F.toInt()
  */
 data class GazeSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val themeVariant: ThemeVariant = ThemeVariant.PAPER,
+    /** 只有**全新安装**会拿到这个默认值；老用户存在 DataStore 里的选择不受影响。 */
+    val themeVariant: ThemeVariant = ThemeVariant.DEFAULT,
     /** 自定义主题的主色（ARGB）。[ThemeVariant.CUSTOM] 时生效。 */
     val themeSeed: Int = DEFAULT_THEME_SEED,
     val readerBackground: ReaderBackground = ReaderBackground.BLACK,
@@ -51,6 +52,16 @@ data class GazeSettings(
     val libraryLayout: LibraryLayout = LibraryLayout.GRID_2,
     val libraryView: LibraryView = LibraryView.ALL,
     val sortOrder: SortOrder = SortOrder.ADDED_DESC,
+    /**
+     * 文件夹视图是否按子文件夹分层。
+     *
+     * 关（默认）时整个授权根是一组，与 1.7.3 完全一致；开时每个**含文件的**
+     * 子目录各自成组，组标题是相对根的路径（`漫画/黑白漫画`）。
+     *
+     * 默认关是因为对「一堆文件 + 一层子目录」的库，分层反而更碎 ——
+     * 这个偏好因库而异，只能让用户自己选。
+     */
+    val groupBySubfolder: Boolean = false,
     val libraryFilter: LibraryFilter = LibraryFilter.ALL,
     val autoScanOnLaunch: Boolean = true,
     val keepScreenOn: Boolean = true,
@@ -119,6 +130,7 @@ class SettingsRepository(private val context: Context) {
         val LIBRARY_LAYOUT = stringPreferencesKey("library_layout")
         val LIBRARY_VIEW = stringPreferencesKey("library_view")
         val SORT_ORDER = stringPreferencesKey("sort_order")
+        val GROUP_BY_SUBFOLDER = booleanPreferencesKey("group_by_subfolder")
         val LIBRARY_FILTER = stringPreferencesKey("library_filter")
         val AUTO_SCAN = booleanPreferencesKey("auto_scan_on_launch")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
@@ -155,6 +167,7 @@ class SettingsRepository(private val context: Context) {
             libraryLayout = LibraryLayout.of(p[Keys.LIBRARY_LAYOUT]),
             libraryView = LibraryView.of(p[Keys.LIBRARY_VIEW]),
             sortOrder = SortOrder.of(p[Keys.SORT_ORDER]),
+            groupBySubfolder = p[Keys.GROUP_BY_SUBFOLDER] ?: false,
             libraryFilter = LibraryFilter.of(p[Keys.LIBRARY_FILTER]),
             autoScanOnLaunch = p[Keys.AUTO_SCAN] ?: true,
             keepScreenOn = p[Keys.KEEP_SCREEN_ON] ?: true,
@@ -198,6 +211,10 @@ class SettingsRepository(private val context: Context) {
     suspend fun setLibraryLayout(value: LibraryLayout) = put(Keys.LIBRARY_LAYOUT, value.key)
     suspend fun setLibraryView(value: LibraryView) = put(Keys.LIBRARY_VIEW, value.key)
     suspend fun setSortOrder(value: SortOrder) = put(Keys.SORT_ORDER, value.key)
+
+    suspend fun setGroupBySubfolder(value: Boolean) {
+        context.gazeDataStore.edit { it[Keys.GROUP_BY_SUBFOLDER] = value }
+    }
     suspend fun setLibraryFilter(value: LibraryFilter) = put(Keys.LIBRARY_FILTER, value.key)
     suspend fun setScreenOrientation(value: ScreenOrientation) = put(Keys.SCREEN_ORIENTATION, value.key)
 

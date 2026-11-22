@@ -206,7 +206,7 @@ interface ComicDao {
     @Query(
         """
         UPDATE comics SET
-            uri = :uri, folderUri = :folderUri, missing = 0,
+            uri = :uri, folderUri = :folderUri, relDir = :relDir, missing = 0,
             size = :size, modifiedTime = :modifiedTime, fileName = :fileName,
             format = :format, pageCount = :pageCount
         WHERE id = :id
@@ -216,6 +216,7 @@ interface ComicDao {
         id: Long,
         uri: String,
         folderUri: String?,
+        relDir: String?,
         size: Long,
         modifiedTime: Long,
         fileName: String,

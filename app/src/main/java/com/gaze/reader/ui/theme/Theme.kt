@@ -287,7 +287,7 @@ val LocalGazeColors = staticCompositionLocalOf {
 @Composable
 fun GazeTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
-    themeVariant: ThemeVariant = ThemeVariant.PAPER,
+    themeVariant: ThemeVariant = ThemeVariant.DEFAULT,
     themeSeed: Color = DefaultThemeSeed,
     content: @Composable () -> Unit
 ) {

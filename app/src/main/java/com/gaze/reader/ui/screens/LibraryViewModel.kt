@@ -89,7 +89,8 @@ private data class LibraryTransient(
 private data class ShelfPrefs(
     val view: LibraryView,
     val sort: SortOrder,
-    val layout: LibraryLayout
+    val layout: LibraryLayout,
+    val groupBySubfolder: Boolean
 )
 
 private data class LibraryContent(
@@ -125,7 +126,7 @@ class LibraryViewModel(private val container: AppContainer) : ViewModel() {
      * 用户改过排版，重启之后还是那个排版；标签页点「收藏」，回到书架时就是收藏视图。
      */
     private val shelfPrefsFlow: Flow<ShelfPrefs> = container.settingsRepository.settings
-        .map { ShelfPrefs(it.libraryView, it.sortOrder, it.libraryLayout) }
+        .map { ShelfPrefs(it.libraryView, it.sortOrder, it.libraryLayout, it.groupBySubfolder) }
         .distinctUntilChanged()
 
     /**
@@ -153,7 +154,7 @@ class LibraryViewModel(private val container: AppContainer) : ViewModel() {
                     }
 
                 else -> container.comicRepository
-                    .observeShelfGroups(shelf.view, shelf.sort, query)
+                    .observeShelfGroups(shelf.view, shelf.sort, query, shelf.groupBySubfolder)
                     .map {
                         LibraryContent(shelf.view, shelf.sort, shelf.layout, query, emptyList(), it)
                     }

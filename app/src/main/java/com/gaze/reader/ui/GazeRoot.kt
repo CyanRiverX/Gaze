@@ -61,6 +61,7 @@ import com.gaze.reader.ui.components.GazeTagPicker
 import com.gaze.reader.ui.components.Hairline
 import com.gaze.reader.ui.components.TagPickMode
 import com.gaze.reader.ui.screens.AboutSettingsScreen
+import com.gaze.reader.ui.screens.ChangelogScreen
 import com.gaze.reader.ui.screens.AppearanceSettingsScreen
 import com.gaze.reader.ui.screens.BackupSettingsScreen
 import com.gaze.reader.ui.screens.CoverActions
@@ -125,6 +126,7 @@ object Routes {
     const val SETTINGS_BACKUP = "settings/backup"
     const val SETTINGS_MISSING = "settings/missing"
     const val SETTINGS_ABOUT = "settings/about"
+    const val SETTINGS_CHANGELOG = "settings/changelog"
 
     fun reader(id: Long) = "reader/$id"
     fun detail(id: Long) = "detail/$id"
@@ -254,7 +256,15 @@ fun GazeRoot(
                 ScreenInsets { MissingRoute(navController = navController) }
             }
             composable(Routes.SETTINGS_ABOUT) {
-                ScreenInsets { AboutSettingsScreen(onBack = { navController.popBackStack() }) }
+                ScreenInsets {
+                    AboutSettingsScreen(
+                        onOpenChangelog = { navController.navigate(Routes.SETTINGS_CHANGELOG) },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
+            composable(Routes.SETTINGS_CHANGELOG) {
+                ScreenInsets { ChangelogScreen(onBack = { navController.popBackStack() }) }
             }
             composable(Routes.STATS) {
                 ScreenInsets { StatsRoute(container = container, navController = navController) }
@@ -651,6 +661,7 @@ private fun SettingsLibraryRoute(viewModel: SettingsViewModel, navController: Na
         onSetLibraryView = viewModel::setLibraryView,
         onSetLibraryLayout = viewModel::setLibraryLayout,
         onSetSortOrder = viewModel::setSortOrder,
+        onSetGroupBySubfolder = viewModel::setGroupBySubfolder,
         onBack = { navController.popBackStack() }
     )
 }

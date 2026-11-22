@@ -89,7 +89,8 @@ class ComicRepository(
     fun observeShelfGroups(
         view: LibraryView,
         sort: SortOrder,
-        query: String
+        query: String,
+        groupBySubfolder: Boolean = false
     ): Flow<List<ShelfGroup>> = combine(
         comicDao.observeAll(),
         tagDao.observeAll(),
@@ -114,9 +115,19 @@ class ComicRepository(
         when (view) {
             LibraryView.FOLDER -> visible.forEach { comic ->
                 val uri = comic.folderUri
-                val key = if (uri.isNullOrBlank()) UNCLASSIFIED_KEY else FOLDER_PREFIX + uri
-                val title = if (uri.isNullOrBlank()) "未归类" else folderDisplayName(uri)
-                buckets.getOrPut(key) { title to mutableListOf() }.second.add(comic)
+                val rel = comic.relDir?.takeIf { it.isNotBlank() }
+                // 开关关 / 记录没有子目录 → 键与标题都和 1.7.3 完全一致，
+                // 所以升级后不打开开关的话，书架不会有任何变化。
+                if (groupBySubfolder && !uri.isNullOrBlank() && rel != null) {
+                    val key = FOLDER_PREFIX + uri + REL_SEPARATOR + rel
+                    // 组标题用相对路径，层级用「 / 」隔开 —— 深层目录才分得清哪一组
+                    val title = rel.split('/').joinToString(" / ")
+                    buckets.getOrPut(key) { title to mutableListOf() }.second.add(comic)
+                } else {
+                    val key = if (uri.isNullOrBlank()) UNCLASSIFIED_KEY else FOLDER_PREFIX + uri
+                    val title = if (uri.isNullOrBlank()) "未归类" else folderDisplayName(uri)
+                    buckets.getOrPut(key) { title to mutableListOf() }.second.add(comic)
+                }
             }
 
             LibraryView.TAG -> {
@@ -245,12 +256,13 @@ class ComicRepository(
         id: Long,
         uri: String,
         folderUri: String?,
+        relDir: String?,
         size: Long,
         modifiedTime: Long,
         fileName: String,
         format: String,
         pageCount: Int
-    ) = comicDao.relocate(id, uri, folderUri, size, modifiedTime, fileName, format, pageCount)
+    ) = comicDao.relocate(id, uri, folderUri, relDir, size, modifiedTime, fileName, format, pageCount)
 
     /**
      * 把一条「文件找不到」的占位记录并进在库记录，然后删掉占位记录。
@@ -409,8 +421,23 @@ class ComicRepository(
         const val TAG_PREFIX = "TAG:"
         const val UNCLASSIFIED_KEY = "FOLDER:__unclassified__"
 
-        fun groupKeyOf(comic: ComicEntity): String =
-            if (comic.folderUri.isNullOrBlank()) UNCLASSIFIED_KEY
-            else FOLDER_PREFIX + comic.folderUri
+        /**
+         * 分组键里「根 uri」与「相对子目录」的分隔符。
+         *
+         * 用 `#` 而不是 `/`：uri 里本来就满是 `/`，用它当分隔符会让
+         * 「从键里拆回 uri」变成一件需要猜的事。`#` 在 SAF uri 里不出现。
+         */
+        const val REL_SEPARATOR = "#"
+
+        fun groupKeyOf(comic: ComicEntity, groupBySubfolder: Boolean = false): String {
+            val uri = comic.folderUri
+            if (uri.isNullOrBlank()) return UNCLASSIFIED_KEY
+            val rel = comic.relDir?.takeIf { it.isNotBlank() }
+            return if (groupBySubfolder && rel != null) {
+                FOLDER_PREFIX + uri + REL_SEPARATOR + rel
+            } else {
+                FOLDER_PREFIX + uri
+            }
+        }
     }
 }

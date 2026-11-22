@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ReadingSessionEntity::class,
         ShelfCoverEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class GazeDatabase : RoomDatabase() {
@@ -120,13 +120,30 @@ abstract class GazeDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v5 -> v6。
+         *
+         * 只给 `comics` 加一列 `relDir`：记录文件相对授权根的子目录路径，
+         * 让书架能按子文件夹分层（「漫画/黑白漫画」「漫画/彩色漫画」各自成组）。
+         *
+         * 可空、无默认值 —— 老数据全是 NULL，语义正好是「根目录直属」，
+         * 分组键回落到原先的 `FOLDER:<rootUri>`，升级后不重扫则书架毫无变化。
+         */
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `comics` ADD COLUMN `relDir` TEXT")
+            }
+        }
+
         fun get(context: Context): GazeDatabase = instance ?: synchronized(this) {
             instance ?: build(context.applicationContext).also { instance = it }
         }
 
         private fun build(context: Context): GazeDatabase =
             Room.databaseBuilder(context, GazeDatabase::class.java, "gaze.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(
+                    MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6
+                )
                 // 不用 destructive fallback：宁可启动报错，也不能悄悄清掉用户的阅读进度与标签。
                 .build()
     }

@@ -18,10 +18,9 @@ android {
         minSdk = 24
         targetSdk = 36
         // versionCode 不跟着 versionName 回退：手机上的 Android 只认 versionCode 单调递增，
-        // 退回 14 的话装过 1.7.4 / 1.7.5 的机器必须先卸载才能装。1.7.3 从未对外发布，
-        // 所以「1.7.3 = versionCode 17」不存在历史包袱。
-        versionCode = 17
-        versionName = "1.7.3"
+        // 退回会让装过内部包的机器必须先卸载才能装。
+        versionCode = 18
+        versionName = "1.7.4"
 
         ndk {
             abiFilters += "arm64-v8a"

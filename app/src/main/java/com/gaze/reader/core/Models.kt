@@ -80,8 +80,11 @@ enum class ThemeVariant(val key: String, val label: String) {
     CUSTOM("CUSTOM", "自定义");
 
     companion object {
+        /** 默认主题。全新安装与「键不存在」都落到它，改这里一处即可。 */
+        val DEFAULT = MIST
+
         fun of(key: String?): ThemeVariant =
-            entries.firstOrNull { it.key == key } ?: PAPER
+            entries.firstOrNull { it.key == key } ?: DEFAULT
     }
 }
 
