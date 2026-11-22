@@ -136,7 +136,16 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     fun setLibraryView(value: LibraryView) = viewModelScope.launch { container.settingsRepository.setLibraryView(value) }
     fun setLibraryLayout(value: LibraryLayout) = viewModelScope.launch { container.settingsRepository.setLibraryLayout(value) }
     fun setSortOrder(value: SortOrder) = viewModelScope.launch { container.settingsRepository.setSortOrder(value) }
-    fun setGroupBySubfolder(value: Boolean) = viewModelScope.launch { container.settingsRepository.setGroupBySubfolder(value) }
+    fun setGroupBySubfolder(value: Boolean) = viewModelScope.launch {
+        container.settingsRepository.setGroupBySubfolder(value)
+        // 打开开关时补一次子目录路径。1.7.3 及更早的库这一列是空的，
+        // 不补的话开关看着「没反应」，用户还得自己想到去重新扫描。
+        // 只读目录树，不碰归档，大库也是毫秒级。
+        if (value) {
+            val written = runCatching { container.scanner.backfillRelDirs() }.getOrDefault(0)
+            if (written > 0) _message.value = "已为 $written 本漫画补上子目录分类"
+        }
+    }
 
     // ------------------------------------------------------------ 文件名解析
 

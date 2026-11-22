@@ -19,6 +19,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 enum class ScanPhase { DISCOVERING, IMPORTING, MARKING, DONE }
 
@@ -80,6 +81,36 @@ class LibraryScanner(
 ) {
 
     private val resolver get() = context.contentResolver
+
+    /**
+     * 只补 [ComicEntity.relDir]，不读归档、不算指纹、不动失效标记。
+     *
+     * 「按子文件夹分类」开关打开时需要它：1.7.3 及更早的库这一列全是 NULL，
+     * 而正式扫描对未变化的文件是直接跳过的 —— 用户打开开关后如果又懒得手动
+     * 重扫一遍，就永远看不到分类效果。这里只走目录树（毫秒级），把缺的补上。
+     *
+     * 返回补写的条数，供调用方决定要不要提示。
+     */
+    suspend fun backfillRelDirs(): Int = withContext(Dispatchers.IO) {
+        val folderList = folders.getAuthorized()
+        if (folderList.isEmpty()) return@withContext 0
+        val discovered = ArrayList<DiscoveredFile>()
+        for (folder in folderList) {
+            currentCoroutineContext().ensureActive()
+            discoverFolder(folder.uri, discovered)
+        }
+        var written = 0
+        for (file in discovered) {
+            currentCoroutineContext().ensureActive()
+            val rel = file.relDir ?: continue
+            val existing = comics.findByUri(file.uri.toString()) ?: continue
+            if (existing.relDir == null) {
+                backfillRelDir(existing.id, rel)
+                written++
+            }
+        }
+        written
+    }
 
     fun scanAll(): Flow<ScanProgress> = flow {
         // 只扫真正拿到过权限的文件夹。待重新授权的那些在本机读不出任何东西，
