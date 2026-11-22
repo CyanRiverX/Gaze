@@ -88,11 +88,45 @@ CBZ / CBR / CBT / CB7、ZIP / RAR / TAR / 7Z、PDF、EPUB 都可以直接加入�
 
 ## 技术栈
 
-Kotlin 2.1 · Jetpack Compose + Material 3 · Room 2.7 · DataStore · Coil 2.7 · commons-compress + junrar · Android `PdfRenderer` · AGP 8.11 + Gradle 8.13
+| 领域 | 选型 |
+|---|---|
+| 语言 | Kotlin 2.1.20 |
+| UI | Jetpack Compose + Material 3 |
+| 归档解析 | commons-compress 1.27.1 + xz 1.10（ZIP / TAR / 7Z）、junrar 7.5.5（RAR） |
+| PDF | Android `PdfRenderer` |
+| 图片 | Coil 2.7.0 + `BitmapRegionDecoder`（区域解码） |
+| 本地存储 | Room 2.7.1 |
+| 设置 | DataStore Preferences |
+| 文件访问 | Storage Access Framework |
+| 构建 | AGP 8.11.1 + Gradle 8.13 + JDK 17 |
 
 ## 兼容性
 
-Android 7.0（API 24）以上，目标 Android 16（API 36），仅打包 `arm64-v8a`，签名 Scheme V2 + V3。
+| 项 | 值 |
+|---|---|
+| 最低版本 | Android 7.0（API 24） |
+| 目标版本 | Android 16（API 36） |
+| CPU 架构 | arm64-v8a |
+| 签名 | APK Signature Scheme V2 + V3 |
+
+只打包 `arm64-v8a`，32 位设备装不上。
+
+## 项目结构
+
+```
+Gaze/
+├── app/src/main/java/com/gaze/reader/
+│   ├── archive/         归档读取层（ZIP / RAR / 7Z / TAR）+ 页面提供者 + PDF / EPUB
+│   ├── backup/          备份导出与恢复
+│   ├── core/            自然排序、文件名解析、格式定义、枚举
+│   ├── data/            Room 数据库、仓库层、DataStore 设置
+│   ├── domain/          标签配色、内容指纹、SAF 路径显示
+│   ├── image/           图片解码、封面缓存
+│   ├── scan/            增量扫描、文件重定位、封面生成与更换、SAF 权限
+│   └── ui/              Compose 界面（导航 / 组件 / 页面 / 主题）
+├── assets/              README 的图标与屏幕截图
+└── tools/               图标生成脚本
+```
 
 ## 构建
 
@@ -117,7 +151,25 @@ keyPassword=<你的密码>
 
 ## 版本记录
 
-完整变更见 [Releases](https://github.com/CyanRiverX/Gaze/releases)，应用内「设置 → 关于 → 更新日志」也有。
+完整变更见 [Releases](https://github.com/CyanRiverX/Gaze/releases)。
+
+| 版本 | 说明 |
+|---|---|
+| 1.7.4 | 按子文件夹分类；修切换排序后跳位；默认主题改为灰蓝 |
+| 1.7.3 | 点击翻页；详情页更换封面；标签详情页跟随书架排版 |
+| 1.7.2 | 修标签拖动排序在交界处失控 |
+| 1.7.1 | 修恢复备份后标签与进度丢失；扫描合并重复记录 |
+| 1.7.0 | 媒体匹配页；恢复备份改为「待重新授权」；备份补全字段 |
+| 1.6.0 | 标签拖动排序；修返回直接退出应用 |
+| 1.5.1 | 修「打开方式」导入备份失败；收藏独立成区 |
+| 1.5.0 | 标签页两列卡片；文件名解析重做 |
+| 1.4.0 | PDF 与 EPUB 支持；可拖动滚动条与返回顶部；8 套主题 |
+| 1.3.1 | 修收藏页闪退；设置页改为一栏一卡 |
+| 1.3.0 | 按原图分辨率渲染；标签长按批量；细滚动条 |
+| 1.2.0 | 设置拆二级页；纸张主题；备份与自动备份 |
+| 1.1.0 | 阅读统计；坏页重试与跳过；扩展元数据 |
+| 1.0.1 | 修封面蒙纱、顶栏重叠、扫描提示反复弹出 |
+| 1.0.0 | 首个版本 |
 
 ## 免责声明
 
