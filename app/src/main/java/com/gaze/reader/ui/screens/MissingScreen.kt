@@ -131,7 +131,6 @@ fun MissingScreen(
         if (state.groups.isEmpty()) {
             SettingsSection("状态", icon = GazeIcons.Info) {
                 SettingsNote("所有漫画都能在本机找到对应文件。")
-                SettingsNote("恢复备份后找不到文件的漫画会出现在这里，进度、收藏和标签都保留。")
             }
         } else if (opened != null) {
             GroupDetail(
@@ -207,13 +206,6 @@ private fun GroupList(
     onRemoveAll: () -> Unit,
     onAuthorize: () -> Unit
 ) {
-    SettingsSection("这一页在做什么", icon = GazeIcons.Info) {
-        SettingsNote(
-            "这些漫画的记录都还在，只是指向的文件在本机找不到了。\n" +
-                "「重新定位」由你手动指文件；「扫描并自动匹配」由 Gaze 自己按内容找。"
-        )
-    }
-
     if (state.orphanFolders.isNotEmpty()) {
         SettingsSection("需要重新授权", icon = GazeIcons.Folder) {
             SettingsNote(
@@ -243,7 +235,6 @@ private fun GroupList(
     }
 
     SettingsSection("待重新定位（${state.total} 本）", icon = Icons.Default.Warning) {
-        SettingsNote("按原文件夹分组，点进一组可以逐条重新定位。")
         state.groups.forEach { group ->
             GroupRow(group = group, onClick = { onOpen(group) })
             Hairline(Modifier.padding(start = SettingsRowInset))
@@ -319,15 +310,11 @@ private fun GroupDetail(
     onAuthorize: () -> Unit
 ) {
     SettingsSection(group.title, icon = GazeIcons.Folder) {
-        SettingsNote(
-            "这 ${group.count} 本都来自同一个目录，记录都还在，只是文件在本机找不到了。"
-        )
         group.uri?.let { uri ->
             StatRow("原位置", UriDisplay.readable(uri))
             Hairline(Modifier.padding(start = SettingsRowInset))
         }
         if (group.pending) {
-            SettingsNote("这个目录还没重新授权。授权后点「扫描并自动匹配」，通常能一次接回大半。")
             AuthorizeRow(label = "重新授权这个目录", onAuthorize = onAuthorize)
         }
         ActionRow(

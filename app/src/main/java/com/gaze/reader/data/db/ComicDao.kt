@@ -193,6 +193,16 @@ interface ComicDao {
     @Query("UPDATE comics SET sampleHash = :hash WHERE id = :id")
     suspend fun setSampleHash(id: Long, hash: String)
 
+    /**
+     * 补写 [relDir]。
+     *
+     * 1.7.3 及更早的记录没有这一列，而扫描对「未变化的文件」是直接跳过的 ——
+     * 不单独补一次，「按子文件夹分类」开关打开后对老库完全不生效。
+     * 只在原来为 NULL 时写，不覆盖已算好的相对路径。
+     */
+    @Query("UPDATE comics SET relDir = :relDir WHERE id = :id AND relDir IS NULL")
+    suspend fun backfillRelDir(id: Long, relDir: String)
+
     @Query("UPDATE comics SET fingerprint = :fingerprint, sampleHash = :hash WHERE id = :id")
     suspend fun setFingerprint(id: Long, fingerprint: String, hash: String)
 

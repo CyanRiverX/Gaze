@@ -45,7 +45,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -644,79 +643,43 @@ private fun BackToTopButton(
     }
 }
 
-// ==================================================================== 滚动锚点
+// ==================================================================== 改排序后回顶部
 
 /**
- * 记住「当前顶上看的是哪一项」，列表重新排序后回到它所在的位置。
+ * 改排序方式后把列表拉回顶部。
  *
- * 解决的是这样一个 bug：改排序方式时数据集整体重排，但 `LazyListState`
- * 记的是**下标**（`firstVisibleItemIndex`），下标本身没有变过 ——
- * 于是视口停在一个完全无关的位置上，用户看到的是页面「乱跳」。
+ * 要解决的是一个 bug：`LazyListState` 记的是**下标**（`firstVisibleItemIndex`），
+ * 而改排序只是把数据集整体重排、下标数值没动过 —— 于是视口停在一个
+ * 完全无关的位置上，用户看到的是页面「乱跳」。
  *
- * 做法是盯住当前首个可见项的 [key]（就是 `items(key = …)` 里的那个 id），
- * 排序变化后到 [keys]（**新顺序的键序列**）里重新查它的下标，再滚过去。
+ * 这里选择**一刀切回顶部**，而不是记住顶上那一项再滚过去：
+ * 能改排序的入口（书架、收藏页的排序菜单）本身就在页面顶部、顶部栏可见时
+ * 才拿得到，用户按下排序的那一刻视口就在顶上，回顶部等于原地不动。
+ * 锚点方案反而要在数据回流时反复校正，得不偿失。
  *
- * 几个必要的细节：
- *
- * - **换算必须用新数据列表**。不能读 `state.layoutInfo`：重排之后那里的
- *   `visibleItemsInfo` 已经是新数据、老下标，锚点项常常根本不在可见范围内。
- * - **只在排序真的变了的时候动**。数据增长（扫描进新书）、搜索过滤都会让
- *   序列变化，但那些时候用户不该被拽走 —— 尤其扫描时每导入一本就回流一次。
- * - **不记像素偏移**：排序后卡片高度分布会变，硬追 offset 会落到半屏。
- * - **锚点项不存在时（被过滤掉了）安静退出**，不要退回顶部 ——
- *   那是用户自己删/搜导致的，跳顶反而突兀。
+ * 只在 [sortKey] **真的变了**时动：扫描进新书、搜索过滤同样会让序列变化，
+ * 那些时候用户不该被拽走 —— 尤其扫描时每导入一本就回流一次。
  */
 @Composable
-fun rememberGridSortAnchor(
-    state: LazyGridState,
-    sortKey: Any?,
-    keys: List<Any>
-): LazyGridState {
-    var anchorKey by remember { mutableStateOf<Any?>(null) }
+fun rememberGridSortToTop(state: LazyGridState, sortKey: Any?): LazyGridState {
     var knownSort by remember { mutableStateOf(sortKey) }
-
-    // 首次组合与每次滚动都记一次锚点：用户停在哪一屏，锚点就是那一屏的第一项。
-    LaunchedEffect(state) {
-        snapshotFlow { state.firstVisibleItemIndex }
-            .collect { anchorKey = state.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
-    }
-
-    LaunchedEffect(sortKey, keys) {
-        val previous = knownSort
+    LaunchedEffect(sortKey) {
+        // 第一帧 knownSort 就是初值，什么都没变，不该动。
+        if (knownSort === sortKey) return@LaunchedEffect
         knownSort = sortKey
-        // 第一帧 sortKey 就是初值，此时什么都没变，不该动。
-        if (previous === sortKey) return@LaunchedEffect
-        val target = anchorKey ?: return@LaunchedEffect
-        val index = keys.indexOf(target)
-        if (index >= 0) state.scrollToItem(index)
+        state.scrollToItem(0)
     }
     return state
 }
 
-/**
- * [rememberGridSortAnchor] 的列表版本。
- */
+/** [rememberGridSortToTop] 的列表版本。 */
 @Composable
-fun rememberListSortAnchor(
-    state: LazyListState,
-    sortKey: Any?,
-    keys: List<Any>
-): LazyListState {
-    var anchorKey by remember { mutableStateOf<Any?>(null) }
+fun rememberListSortToTop(state: LazyListState, sortKey: Any?): LazyListState {
     var knownSort by remember { mutableStateOf(sortKey) }
-
-    LaunchedEffect(state) {
-        snapshotFlow { state.firstVisibleItemIndex }
-            .collect { anchorKey = state.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
-    }
-
-    LaunchedEffect(sortKey, keys) {
-        val previous = knownSort
+    LaunchedEffect(sortKey) {
+        if (knownSort === sortKey) return@LaunchedEffect
         knownSort = sortKey
-        if (previous === sortKey) return@LaunchedEffect
-        val target = anchorKey ?: return@LaunchedEffect
-        val index = keys.indexOf(target)
-        if (index >= 0) state.scrollToItem(index)
+        state.scrollToItem(0)
     }
     return state
 }

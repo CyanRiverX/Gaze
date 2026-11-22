@@ -80,8 +80,8 @@ import com.gaze.reader.ui.components.SectionLabel
 import com.gaze.reader.ui.components.TagColorPicker
 import com.gaze.reader.ui.components.ThinProgress
 import com.gaze.reader.ui.components.combinedClickableCompat
-import com.gaze.reader.ui.components.rememberGridSortAnchor
-import com.gaze.reader.ui.components.rememberListSortAnchor
+import com.gaze.reader.ui.components.rememberGridSortToTop
+import com.gaze.reader.ui.components.rememberListSortToTop
 import com.gaze.reader.ui.theme.gazeColors
 import kotlin.math.roundToInt
 
@@ -850,9 +850,8 @@ fun FavoritesScreen(
 ) {
     val colors = gazeColors
     var sortMenu by remember { mutableStateOf(false) }
-    // 收藏页也吃「改排序后跳位置」这个 bug，修法与书架共用同一套锚点。
-    val comicKeys = remember(comics) { comics.map { it.id } }
-    val gridState = rememberGridSortAnchor(rememberLazyGridState(), sort, comicKeys)
+    // 收藏页也吃「改排序后跳位置」这个 bug，修法与书架共用同一套做法。
+    val gridState = rememberGridSortToTop(rememberLazyGridState(), sort)
 
     Column(Modifier.fillMaxSize()) {
         Row(
@@ -1004,10 +1003,9 @@ fun TagDetailScreen(
 ) {
     val colors = gazeColors
     var sortMenu by remember { mutableStateOf(false) }
-    // 标签详情与书架共用同一套滚动锚点：改排序后视口跟住原来那一本。
-    val comicKeys = remember(comics) { comics.map { it.id } }
-    val gridState = rememberGridSortAnchor(rememberLazyGridState(), sort, comicKeys)
-    val listState = rememberListSortAnchor(rememberLazyListState(), sort, comicKeys)
+    // 标签详情与书架共用同一套做法：改排序后回顶部。
+    val gridState = rememberGridSortToTop(rememberLazyGridState(), sort)
+    val listState = rememberListSortToTop(rememberLazyListState(), sort)
 
     Column(Modifier.fillMaxSize()) {
         Row(

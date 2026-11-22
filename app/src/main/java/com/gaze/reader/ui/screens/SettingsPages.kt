@@ -328,7 +328,6 @@ fun ReadingSettingsScreen(
         }
 
         SettingsSection("阅读器背景", icon = GazeIcons.Brightness) {
-            SettingsNote("与系统主题独立，阅读时照样可以用黑底。")
             ChoiceRow(
                 label = "漫画背景",
                 options = ReaderBackground.entries.map { it.key to it.label },
@@ -454,7 +453,6 @@ fun LibrarySettingsScreen(
         }
 
         SettingsSection("排序", icon = GazeIcons.TextLines) {
-            SettingsNote("「名称 A-Z」按自然数字顺序：「第 2 卷」排在「第 10 卷」前面。")
             ChoiceRow(
                 label = "默认排序",
                 options = SortOrder.entries.map { it.key to it.label },
@@ -1072,7 +1070,6 @@ fun BackupSettingsScreen(
         SettingsSection("备份文件夹", icon = GazeIcons.Folder) {
             val folderName = settings.backupFolderName
             if (folderName.isNullOrBlank()) {
-                SettingsNote("指定一个文件夹之后，备份可以一键完成，也才能开启自动备份。")
                 ActionRow(
                     label = "指定备份文件夹",
                     subtitle = "从系统文件管理器里选一个目录",
@@ -1166,12 +1163,11 @@ fun BackupSettingsScreen(
         // ---------------------------------------------------- 历史备份
         SettingsSection("历史备份", icon = GazeIcons.History) {
             if (settings.backupFolderName.isNullOrBlank()) {
-                SettingsNote("指定备份文件夹后，这里会列出其中的全部备份。")
+                SettingsNote("尚未指定备份文件夹。")
             } else if (backups.isEmpty()) {
                 SettingsNote("这个文件夹里还没有 Gaze 备份。")
                 ActionRow(label = "重新读取", onClick = onRefreshBackups)
             } else {
-                SettingsNote("点「恢复」把某一份写回；点「核对」检查它里面的漫画本地还剩几本。")
                 backups.forEach { entry ->
                     BackupEntryRow(
                         entry = entry,
@@ -1375,7 +1371,7 @@ fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     SettingsPage(title = "关于 Gaze", onBack = onBack) {
         SettingsSection("简介", icon = GazeIcons.Info) {
-            SettingsNote("完全本地的漫画阅读器。不登录、不上传，安装包里没有任何网络权限。")
+            SettingsNote("完全本地的漫画阅读器。")
             StatRow("版本", BuildConfig.VERSION_NAME)
             StatRow("开发者", "萧雨")
             StatRow(
@@ -1508,11 +1504,10 @@ private val CHANGELOG = listOf(
     ReleaseNote(
         version = "1.7.4",
         items = listOf(
-            "文件夹视图可按子文件夹分类：每个含漫画的子目录各自成为一个书架文件夹",
-            "默认主题改为「灰蓝」（仅影响全新安装，已选过的主题不变）",
-            "修复切换排序后书架、标签页会跳到不相干的位置",
+            "文件夹视图可按子文件夹分类，每个含漫画的子目录各成一个书架文件夹",
+            "修复切换排序后书架、标签页跳到不相干位置的问题，改为回到顶部",
             "关于页新增 GitHub 源码地址，更新日志移到独立页面",
-            "清理了设置页里过长、过细的说明文字"
+            "清理了设置页里多余、啰嗦的说明文字"
         )
     ),
     ReleaseNote(

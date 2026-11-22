@@ -87,8 +87,8 @@ import com.gaze.reader.ui.components.ScreenTitle
 import com.gaze.reader.ui.components.SectionLabel
 import com.gaze.reader.ui.components.ThinProgress
 import com.gaze.reader.ui.components.combinedClickableCompat
-import com.gaze.reader.ui.components.rememberGridSortAnchor
-import com.gaze.reader.ui.components.rememberListSortAnchor
+import com.gaze.reader.ui.components.rememberGridSortToTop
+import com.gaze.reader.ui.components.rememberListSortToTop
 import com.gaze.reader.ui.theme.gazeColors
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -133,13 +133,10 @@ fun LibraryScreen(
     // 滚动状态提升到这一层：顶部菜单的自动收起要靠它判断「有没有滚离顶部」。
     //
     // 三者都要跟着排序走：改排序后数据集整体重排，但 state 记的是下标，
-    // 下标没变 → 页面会跳到一个完全无关的位置。锚点辅助函数会把视口
-    // 拉回「排序前顶上那一项」现在所在的位置。
-    val comicKeys = remember(state.comics) { state.comics.map { it.id } }
-    val groupKeys = remember(state.groups) { state.groups.map { it.key } }
-    val gridState = rememberGridSortAnchor(rememberLazyGridState(), state.sort, comicKeys)
-    val listState = rememberListSortAnchor(rememberLazyListState(), state.sort, comicKeys)
-    val groupState = rememberGridSortAnchor(rememberLazyGridState(), state.sort, groupKeys)
+    // 下标没变 → 页面会跳到一个完全无关的位置。改排序后一律回顶部。
+    val gridState = rememberGridSortToTop(rememberLazyGridState(), state.sort)
+    val listState = rememberListSortToTop(rememberLazyListState(), state.sort)
+    val groupState = rememberGridSortToTop(rememberLazyGridState(), state.sort)
     var searchFocused by remember { mutableStateOf(false) }
 
     /**

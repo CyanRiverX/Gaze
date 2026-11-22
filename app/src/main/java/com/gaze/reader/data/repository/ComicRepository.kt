@@ -344,6 +344,9 @@ class ComicRepository(
     suspend fun upsert(comic: ComicEntity): Long = comicDao.upsert(comic)
     suspend fun upsertAll(comics: List<ComicEntity>): List<Long> = comicDao.upsertAll(comics)
 
+    /** 补写子目录相对路径（老库升级用，只补 NULL 不覆盖）。 */
+    suspend fun backfillRelDir(id: Long, relDir: String) = comicDao.backfillRelDir(id, relDir)
+
     /**
      * 清空整个库（覆盖恢复用）。
      *

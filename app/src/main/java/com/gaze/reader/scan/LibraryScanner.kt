@@ -204,11 +204,16 @@ class LibraryScanner(
                     // 文件回来了：撤销失效标记，顺手补算内容特征
                     comics.setMissing(existing.id, false)
                     ensureContentFeatures(existing, file)
+                    if (existing.relDir == null && file.relDir != null) backfillRelDir(existing.id, file.relDir)
                     FileResult.UPDATED
                 }
                 else -> {
                     // 未变化 —— 但如果还缺内容特征，补一次（老数据升级路径）
                     if (existing.sampleHash == null) ensureContentFeatures(existing, file)
+                    // 同理补 relDir：1.7.3 及更早的记录这一列是 NULL，
+                    // 而「未变化就跳过」会让它永远是 NULL —— 那样
+                    // 「按子文件夹分类」开关怎么开都不会生效。
+                    if (existing.relDir == null && file.relDir != null) backfillRelDir(existing.id, file.relDir)
                     FileResult.SKIPPED
                 }
             }
@@ -406,6 +411,11 @@ class LibraryScanner(
             MediaFingerprint.fingerprint(file.name, file.size, existing.pageCount, hash),
             hash
         )
+    }
+
+    /** 给老数据补写子目录相对路径（只补 NULL，不动已算好的）。 */
+    private suspend fun backfillRelDir(id: Long, relDir: String) {
+        comics.backfillRelDir(id, relDir)
     }
 
     /**

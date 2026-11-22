@@ -70,9 +70,10 @@ enum class ThemeMode(val key: String, val label: String) {
  * 由用户挑一个主色，程序从它派生出纸色、墨色与强调色。
  */
 enum class ThemeVariant(val key: String, val label: String) {
+    // 顺序即设置页色卡网格的排列顺序，默认主题排第一格。
+    MIST("MIST", "灰蓝"),
     PAPER("PAPER", "宣纸"),
     CREAM("CREAM", "米黄"),
-    MIST("MIST", "灰蓝"),
     SAGE("SAGE", "青瓷"),
     ROSE("ROSE", "藕粉"),
     GRAPHITE("GRAPHITE", "石墨"),
