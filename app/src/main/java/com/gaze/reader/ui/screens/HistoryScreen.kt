@@ -81,7 +81,7 @@ fun HistoryScreen(
         if (comics.isEmpty()) {
             EmptyState(
                 title = "还没有阅读记录",
-                message = "读过任何一本之后，这里会按时间倒序列出它们。"
+                message = "读过任何一本之后，这里会按时间倒序列出它们"
             )
             return@Column
         }

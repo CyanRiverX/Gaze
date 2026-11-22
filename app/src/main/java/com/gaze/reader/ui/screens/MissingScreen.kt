@@ -130,7 +130,7 @@ fun MissingScreen(
 
         if (state.groups.isEmpty()) {
             SettingsSection("状态", icon = GazeIcons.Info) {
-                SettingsNote("所有漫画都能在本机找到对应文件。")
+                SettingsNote("所有漫画都能在本机找到对应文件")
             }
         } else if (opened != null) {
             GroupDetail(
@@ -158,7 +158,7 @@ fun MissingScreen(
             text = {
                 Text(
                     "会清掉这些漫画的阅读进度、收藏和标签关系。手机上的文件不会被删。\n\n" +
-                        "不可撤销 —— 还想再找找文件的话，先试「扫描并自动匹配」。"
+                        "不可撤销，还想再找找先试「扫描并自动匹配」"
                 )
             },
             confirmButton = {
@@ -180,7 +180,7 @@ fun MissingScreen(
             text = {
                 Text(
                     "会清掉这一组漫画的阅读进度、收藏和标签关系。手机上的文件不会被删。\n\n" +
-                        "不可撤销 —— 还想再找找文件的话，先试「扫描并自动匹配」。"
+                        "不可撤销，还想再找找先试「扫描并自动匹配」"
                 )
             },
             confirmButton = {
@@ -208,9 +208,6 @@ private fun GroupList(
 ) {
     if (state.orphanFolders.isNotEmpty()) {
         SettingsSection("需要重新授权", icon = GazeIcons.Folder) {
-            SettingsNote(
-                "备份带回来的文件夹没法自动恢复读权限，需要你重新点一次目录选择器。"
-            )
             state.orphanFolders.forEach { folder ->
                 StatRow(folder.displayName, UriDisplay.readable(folder.uri), stacked = true)
                 Hairline(Modifier.padding(start = SettingsRowInset))
@@ -222,13 +219,11 @@ private fun GroupList(
     SettingsSection("批量操作", icon = Icons.Default.Refresh) {
         ActionRow(
             label = "扫描并自动匹配",
-            subtitle = "按文件名、大小、内容采样重新比对，能对上的会自动接回原记录",
             onClick = onScan
         )
         Hairline(Modifier.padding(start = SettingsRowInset))
         ActionRow(
             label = "全部移除",
-            subtitle = "${state.total} 条记录 —— 只清 Gaze 里的数据，手机上的文件不动",
             destructive = true,
             onClick = onRemoveAll
         )

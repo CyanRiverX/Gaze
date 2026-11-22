@@ -28,8 +28,8 @@ enum class ReadMode(val key: String, val label: String, val hint: String) {
  *   代价是内存与打开时间。
  */
 enum class RenderMode(val key: String, val label: String, val hint: String) {
-    OPTIMIZED("OPTIMIZED", "按需渲染", "按显示尺寸解码 · 放大时自动请求更高分辨率区域"),
-    TRADITIONAL("TRADITIONAL", "原尺寸渲染", "整页按原图像素解码，最清晰，内存占用最高");
+    OPTIMIZED("OPTIMIZED", "按需渲染", "按显示尺寸解码 · 放大时请求更高分辨率"),
+    TRADITIONAL("TRADITIONAL", "原尺寸渲染", "整页按原图解码，最清晰也最占内存");
 
     companion object {
         fun of(key: String?): RenderMode =

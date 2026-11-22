@@ -301,7 +301,7 @@ fun ReadingSettingsScreen(
         onBack = onBack
     ) {
         SettingsSection("默认阅读", icon = GazeIcons.Book) {
-            SettingsNote("这里是全局默认；在阅读页单独改过的漫画会记住自己的设置。")
+            SettingsNote("全局默认，阅读页单独设置的会单独记住设置")
             ChoiceRow(
                 label = "阅读模式",
                 options = ReadMode.entries.map { it.key to it.label },
@@ -339,7 +339,6 @@ fun ReadingSettingsScreen(
         SettingsSection("屏幕", icon = GazeIcons.Rotate) {
             ChoiceRow(
                 label = "屏幕旋转",
-                hint = "阅读页的方向可以独立于系统设置。",
                 options = ScreenOrientation.entries.map { it.key to it.label },
                 selected = settings.screenOrientation.key,
                 onSelect = { onSetScreenOrientation(ScreenOrientation.of(it)) }
@@ -348,12 +347,7 @@ fun ReadingSettingsScreen(
             ToggleRow(
                 label = "亮度跟随系统",
                 checked = settings.brightnessFollowSystem,
-                onChange = onSetBrightnessFollowSystem,
-                hint = if (settings.brightnessFollowSystem) {
-                    "阅读页使用系统亮度，不会覆盖你手动调过的屏幕亮度。"
-                } else {
-                    "阅读页使用下面的自定义亮度，退出后自动还原。"
-                }
+                onChange = onSetBrightnessFollowSystem
             )
             if (!settings.brightnessFollowSystem) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = SettingsRowInset, vertical = 4.dp)) {
@@ -390,16 +384,13 @@ fun ReadingSettingsScreen(
             ToggleRow(
                 label = "点击翻页",
                 checked = settings.tapToPage,
-                onChange = onSetTapToPage,
-                hint = "横向翻页时点左三分之一上一页、右三分之一下一页；纵向连续模式改成点上方和下方。" +
-                    "中间那条切换控件栏，放大查看时点击也只切换控件栏。"
+                onChange = onSetTapToPage
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
             ToggleRow(
                 label = "音量键翻页",
                 checked = settings.volumeKeyPaging,
-                onChange = onSetVolumeKeyPaging,
-                hint = "音量上键上一页、下键下一页。开启后阅读页会占用音量键，无法调节音量。"
+                onChange = onSetVolumeKeyPaging
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
             ToggleRow(
@@ -430,7 +421,6 @@ fun LibrarySettingsScreen(
         SettingsSection("默认视图", icon = GazeIcons.grid(2)) {
             ChoiceRow(
                 label = "视图",
-                hint = "「文件夹」与「标签」会把同一个目录 / 同一个标签下的漫画收进一个书架文件夹。",
                 options = LibraryView.entries.map { it.key to it.label },
                 selected = settings.libraryView.key,
                 onSelect = { onSetLibraryView(LibraryView.of(it)) }
@@ -439,7 +429,7 @@ fun LibrarySettingsScreen(
                 label = "按子文件夹分类",
                 checked = settings.groupBySubfolder,
                 onChange = onSetGroupBySubfolder,
-                hint = "开启后，每个含漫画的子文件夹各自成为一个书架文件夹。"
+                hint = "开启后文件夹视图下每个含漫画的子文件夹各自成为一个书架文件夹"
             )
         }
 
@@ -516,9 +506,8 @@ fun MediaSettingsScreen(
         // 真正和「扫描 / 存储」有关的三件事：授权目录、扫描、缓存与维护。
 
         SettingsSection("已授权文件夹", icon = GazeIcons.Folder) {
-            SettingsNote("Gaze 只读取你主动授权的目录，不做全盘扫描。")
             if (authorized.isEmpty()) {
-                SettingsNote("还没有授权任何文件夹。")
+                SettingsNote("还没有授权任何文件夹")
             } else {
                 authorized.forEach { folder ->
                     FolderRow(folder = folder, onRemove = { onRemoveFolder(folder.uri) })
@@ -540,10 +529,7 @@ fun MediaSettingsScreen(
 
         if (pendingFolders.isNotEmpty()) {
             SettingsSection("待重新授权的文件夹", icon = GazeIcons.Info) {
-                SettingsNote(
-                    "这些目录来自一份恢复回来的备份，还不是已授权状态。备份里存不下 SAF 读权限，" +
-                        "重新点一次目录选择器即可。"
-                )
+                SettingsNote("来自一份恢复回来的备份，处于未授权状态")
                 pendingFolders.forEach { folder ->
                     PendingFolderRow(
                         folder = folder,
@@ -558,11 +544,11 @@ fun MediaSettingsScreen(
         if (missingCount > 0) {
             SettingsSection("媒体匹配", icon = Icons.Default.Warning) {
                 SettingsNote(
-                    "$missingCount 本漫画在本机找不到对应文件，进度、收藏和标签都还留着。"
+                    "$missingCount 本漫画在本机找不到对应文件，进度、收藏和标签都还留着"
                 )
                 ActionRow(
                     label = "去媒体匹配",
-                    subtitle = "手动重新定位，或让 Gaze 自己按内容找",
+                    subtitle = "手动重新定位，或按内容自动匹配",
                     onClick = onOpenMissing
                 )
             }
@@ -571,28 +557,24 @@ fun MediaSettingsScreen(
         SettingsSection("扫描", icon = Icons.Default.Refresh) {
             ActionRow(
                 label = "重新扫描漫画库",
-                subtitle = "只检查发生变化的文件，不会重新解析整个库",
                 onClick = onScan
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
             ToggleRow(
                 label = "启动时自动增量扫描",
                 checked = settings.autoScanOnLaunch,
-                onChange = onSetAutoScan,
-                hint = "后台进行，只在书架顶部显示进度。"
+                onChange = onSetAutoScan
             )
         }
 
         SettingsSection("缓存与维护", icon = GazeIcons.Archive) {
             ActionRow(
                 label = "清空封面缓存",
-                subtitle = "下次打开书架会重新生成",
                 onClick = onClearCoverCache
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
             ActionRow(
                 label = "检查文件健康",
-                subtitle = "逐个打开归档，找出损坏、加密或页数异常的漫画",
                 onClick = onHealthCheck
             )
             health?.let { report ->
@@ -641,7 +623,7 @@ private fun FolderRow(folder: FolderEntity, onRemove: () -> Unit) {
             text = {
                 Text(
                     "取消授权后 Gaze 不再自动扫描这个目录。\n" +
-                        "已经导入的漫画不会被删除，只是会被标记为失效。",
+                        "已导入的漫画不会被删除，只会标记为失效",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -738,7 +720,7 @@ private fun HealthPanel(
 
     Column(Modifier.fillMaxWidth()) {
         if (report.issues.isEmpty()) {
-            SettingsNote("${report.total} 本全部可以正常读取。")
+            SettingsNote("${report.total} 本全部可以正常读取")
         } else {
             SettingsNote("${report.total} 本中发现 ${report.issues.size} 本有问题：")
             report.issues.take(HEALTH_PREVIEW_LIMIT).forEach { issue ->
@@ -760,7 +742,7 @@ private fun HealthPanel(
                 }
             }
             if (report.issues.size > HEALTH_PREVIEW_LIMIT) {
-                SettingsNote("还有 ${report.issues.size - HEALTH_PREVIEW_LIMIT} 本未列出。")
+                SettingsNote("还有 ${report.issues.size - HEALTH_PREVIEW_LIMIT} 本未列出")
             }
         }
         Row(
@@ -811,8 +793,7 @@ fun NamingSettingsScreen(
     SettingsPage(title = "文件名解析", onBack = onBack) {
         SettingsSection("说明", icon = GazeIcons.Info) {
             SettingsNote(
-                "漫画的文件命名五花八门，下面两条规则只是常见约定，不一定对得上你的文件。" +
-                    "建议以手动改书名、作者为主，自动解析只当兜底。"
+                "漫画命名五花八门，仅供参考，建议手动修改"
             )
         }
 
@@ -821,7 +802,7 @@ fun NamingSettingsScreen(
                 label = "启用分隔符识别",
                 checked = settings.parseAuthorBySeparator,
                 onChange = onSetParseBySeparator,
-                hint = "文件名中最后一个分隔符右侧的内容识别为作者。"
+                hint = "最后一个分隔符右侧识别为作者"
             )
             if (settings.parseAuthorBySeparator) {
                 Hairline(Modifier.padding(start = SettingsRowInset))
@@ -832,7 +813,7 @@ fun NamingSettingsScreen(
                     onSelect = onSetSeparator,
                     sanitize = FileNameParser::sanitizeSeparator,
                     dialogTitle = "自定义分隔符",
-                    dialogHint = "输入 1 个字符，不能是空格。"
+                    dialogHint = "输入 1 个字符，不能是空格"
                 )
             }
         }
@@ -842,7 +823,7 @@ fun NamingSettingsScreen(
                 label = "启用括号识别",
                 checked = settings.parseAuthorByBracket,
                 onChange = onSetParseByBracket,
-                hint = "文件名中第一对括号里的内容识别为作者；两条规则都启用时以括号为准。"
+                hint = "第一对括号里的内容识别为作者；两条都启用时以括号为准"
             )
             if (settings.parseAuthorByBracket) {
                 Hairline(Modifier.padding(start = SettingsRowInset))
@@ -853,7 +834,7 @@ fun NamingSettingsScreen(
                     onSelect = onSetBracket,
                     sanitize = FileNameParser::sanitizeBracket,
                     dialogTitle = "自定义括号",
-                    dialogHint = "输入一对括号，共 2 个字符，例如 〈〉。左右两个字符不能相同。"
+                    dialogHint = "输入一对括号共 2 个字符，例如 〈〉，左右不能相同"
                 )
             }
         }
@@ -870,7 +851,7 @@ fun NamingSettingsScreen(
         SettingsSection("生效", icon = Icons.Default.Check) {
             ActionRow(
                 label = "重新解析全部文件名",
-                subtitle = "手动改过的书名与作者不会被覆盖",
+                subtitle = "手动修改过的不会被覆盖",
                 onClick = onReparseFileNames
             )
         }
@@ -963,7 +944,7 @@ private fun PatternInputDialog(
                 if (text.isNotEmpty() && normalized == null) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "这个输入不可用，请对照上面的说明改一下。",
+                        "这个输入不可用，请对照上面的说明修改",
                         style = MaterialTheme.typography.bodySmall,
                         color = gazeColors.accent
                     )
@@ -1034,10 +1015,8 @@ fun BackupSettingsScreen(
 
     SettingsPage(title = "备份与恢复", onBack = onBack) {
         SettingsSection("说明", icon = GazeIcons.Info) {
-            SettingsNote("备份只含元数据（进度、收藏、标签、设置），不含漫画原文件。")
-            SettingsNote(
-                "文件夹授权带不过去：恢复后需要重新授权一次目录，才能继续扫描。"
-            )
+            SettingsNote("备份只含元数据（进度、收藏、标签、设置），不含漫画原文件")
+            SettingsNote("不含文件夹授权：恢复后需要重新授权")
         }
 
         // ---------------------------------------------------- 上次恢复的结果
@@ -1072,7 +1051,6 @@ fun BackupSettingsScreen(
             if (folderName.isNullOrBlank()) {
                 ActionRow(
                     label = "指定备份文件夹",
-                    subtitle = "从系统文件管理器里选一个目录",
                     onClick = { backupFolderLauncher.launch(null) }
                 )
             } else {
@@ -1080,7 +1058,6 @@ fun BackupSettingsScreen(
                 Hairline(Modifier.padding(start = SettingsRowInset))
                 ActionRow(
                     label = "导出备份到这里",
-                    subtitle = "不必再过一遍系统文件选择器",
                     onClick = onBackupNow
                 )
                 Hairline(Modifier.padding(start = SettingsRowInset))
@@ -1091,7 +1068,6 @@ fun BackupSettingsScreen(
                 Hairline(Modifier.padding(start = SettingsRowInset))
                 ActionRow(
                     label = "取消指定",
-                    subtitle = "已导出的备份文件不会被删除",
                     onClick = onClearBackupFolder
                 )
             }
@@ -1102,7 +1078,7 @@ fun BackupSettingsScreen(
             SettingsSection("自动备份", icon = GazeIcons.History) {
                 ChoiceRow(
                     label = "备份频率",
-                    hint = "只在打开应用时检查是否到点，不做后台常驻 —— 省电，也不需要额外的后台权限。",
+                    hint = "应用启动时自动检查",
                     options = AutoBackupInterval.entries.map { it.key to it.label },
                     selected = settings.autoBackupInterval.key,
                     onSelect = { onSetAutoBackupInterval(AutoBackupInterval.of(it)) }
@@ -1110,7 +1086,7 @@ fun BackupSettingsScreen(
                 Hairline(Modifier.padding(start = SettingsRowInset))
                 ChoiceRow(
                     label = "保留份数",
-                    hint = "只清理自动备份（文件名以 gaze-auto- 开头），手动导出的备份一份都不动。",
+                    hint = "只清理自动备份",
                     options = KEEP_OPTIONS.map { it.toString() to "$it 份" },
                     selected = settings.autoBackupKeep.toString(),
                     onSelect = { onSetAutoBackupKeep(it.toIntOrNull() ?: 5) }
@@ -1121,7 +1097,6 @@ fun BackupSettingsScreen(
                 Hairline(Modifier.padding(start = SettingsRowInset))
                 ActionRow(
                     label = "立即备份一次",
-                    subtitle = "走自动备份的命名与保留策略",
                     onClick = onBackupNow
                 )
             }
@@ -1131,7 +1106,6 @@ fun BackupSettingsScreen(
         SettingsSection("手动导出与导入", icon = GazeIcons.Archive) {
             ActionRow(
                 label = "导出备份",
-                subtitle = "用系统文件选择器指定保存位置",
                 onClick = {
                     pendingExportName = suggestedName
                     exportLauncher.launch(suggestedName)
@@ -1140,8 +1114,6 @@ fun BackupSettingsScreen(
             Hairline(Modifier.padding(start = SettingsRowInset))
             ActionRow(
                 label = "导入备份",
-                subtitle = "从文件管理器选择备份文件。也可以直接在文件管理器里点开备份文件，" +
-                    "在「打开方式」里选 Gaze。",
                 onClick = { importLauncher.launch(arrayOf("*/*")) }
             )
             if (settings.lastExportTime > 0L) {
@@ -1163,9 +1135,9 @@ fun BackupSettingsScreen(
         // ---------------------------------------------------- 历史备份
         SettingsSection("历史备份", icon = GazeIcons.History) {
             if (settings.backupFolderName.isNullOrBlank()) {
-                SettingsNote("尚未指定备份文件夹。")
+                SettingsNote("尚未指定备份文件夹")
             } else if (backups.isEmpty()) {
-                SettingsNote("这个文件夹里还没有 Gaze 备份。")
+                SettingsNote("这个文件夹里还没有 Gaze 备份")
                 ActionRow(label = "重新读取", onClick = onRefreshBackups)
             } else {
                 backups.forEach { entry ->
@@ -1262,11 +1234,11 @@ private fun MissingReportPanel(report: MissingReport, onDismiss: () -> Unit) {
             modifier = Modifier.padding(horizontal = SettingsRowInset, vertical = 4.dp)
         )
         if (report.allPresent) {
-            SettingsNote("${report.total} 本全部能在本地找到，没有丢失。")
+            SettingsNote("${report.total} 本全部能在本地找到，没有丢失")
         } else {
             SettingsNote(
                 "共 ${report.total} 本：${report.matched} 本匹配到本地，" +
-                    "${report.missing.size} 本没找到。"
+                    "${report.missing.size} 本没找到"
             )
             report.missing.take(MISSING_PREVIEW_LIMIT).forEach { item ->
                 Column(Modifier.fillMaxWidth().padding(horizontal = SettingsRowInset, vertical = 5.dp)) {
@@ -1287,7 +1259,7 @@ private fun MissingReportPanel(report: MissingReport, onDismiss: () -> Unit) {
                 }
             }
             if (report.missing.size > MISSING_PREVIEW_LIMIT) {
-                SettingsNote("还有 ${report.missing.size - MISSING_PREVIEW_LIMIT} 本未列出。")
+                SettingsNote("还有 ${report.missing.size - MISSING_PREVIEW_LIMIT} 本未列出")
             }
         }
         Row(
@@ -1371,7 +1343,7 @@ fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     SettingsPage(title = "关于 Gaze", onBack = onBack) {
         SettingsSection("简介", icon = GazeIcons.Info) {
-            SettingsNote("完全本地的漫画阅读器。")
+            SettingsNote("完全本地的漫画阅读器")
             StatRow("版本", BuildConfig.VERSION_NAME)
             StatRow("开发者", "萧雨")
             StatRow(
@@ -1387,19 +1359,17 @@ fun AboutSettingsScreen(onOpenChangelog: () -> Unit, onBack: () -> Unit) {
             // 发 Intent 的是系统浏览器，不是 Gaze。
             ActionRow(
                 label = "在 GitHub 上查看源码",
-                subtitle = "CyanRiverX/Gaze",
                 onClick = { context.openUrl(PROJECT_URL) }
             )
             Hairline(Modifier.padding(start = SettingsRowInset))
             ActionRow(
                 label = "更新日志",
-                subtitle = "全部版本的改动记录",
                 onClick = onOpenChangelog
             )
         }
 
         SettingsSection("隐私", icon = GazeIcons.Info) {
-            SettingsNote("未申请 INTERNET 权限。不联网、不上传、不收集统计。")
+            SettingsNote("未申请 INTERNET 权限，不联网、不上传、不收集统计")
         }
     }
 }
@@ -1504,9 +1474,9 @@ private val CHANGELOG = listOf(
     ReleaseNote(
         version = "1.7.4",
         items = listOf(
-            "文件夹视图可按子文件夹分类，每个含漫画的子目录各成一个书架文件夹",
-            "修复切换排序后书架、标签页跳到不相干位置的问题，改为回到顶部",
-            "关于页新增 GitHub 源码地址，更新日志移到独立页面",
+            "文件夹视图可按子文件夹分类",
+            "修复切换排序后书架、标签页跳到无关位置",
+            "关于页可打开 GitHub 源码，更新日志独立成页",
             "清理了设置页里多余、啰嗦的说明文字"
         )
     ),

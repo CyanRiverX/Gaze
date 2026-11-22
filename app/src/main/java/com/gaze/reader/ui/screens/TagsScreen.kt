@@ -334,7 +334,7 @@ fun TagsScreen(
             if (tags.isEmpty()) {
                 EmptyState(
                     title = "还没有标签",
-                    message = "标签完全由你自己创建。\n可以给漫画分类，比如「日常」「短篇」「已完结」。",
+                    message = "标签完全由你自己创建\n可以给漫画分类，比如「日常」「短篇」「已完结」",
                     primaryLabel = "新建标签",
                     onPrimary = { showCreate = true }
                 )
@@ -458,7 +458,7 @@ fun TagsScreen(
             text = {
                 Text(
                     "标签本身会被删除，漫画与原文件都不受影响 ——" +
-                        "只是这些漫画上不再有这几个标签。",
+                        "只是这些漫画上不再有这几个标签",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -768,7 +768,7 @@ private fun BatchColorDialog(onDismiss: () -> Unit, onPick: (Int) -> Unit) {
         text = {
             Column {
                 Text(
-                    "选一个颜色应用到所有选中的标签。",
+                    "选一个颜色应用到所有选中的标签",
                     style = MaterialTheme.typography.bodySmall,
                     color = gazeColors.inkFaint
                 )
@@ -916,7 +916,7 @@ fun FavoritesScreen(
         if (comics.isEmpty()) {
             EmptyState(
                 title = "还没有收藏",
-                message = "在书架里长按选中漫画，然后点「收藏」。\n收藏是一组跨文件夹、跨标签的漫画。"
+                message = "在书架里长按选中漫画，然后点「收藏」\n收藏是一组跨文件夹、跨标签的漫画"
             )
             return@Column
         }
@@ -1059,7 +1059,7 @@ fun TagDetailScreen(
         if (comics.isEmpty()) {
             EmptyState(
                 title = "这个标签下还没有漫画",
-                message = "在书架里长按选中漫画，然后用「加标签」把它们归到这里。"
+                message = "在书架里长按选中漫画，然后用「加标签」把它们归到这里"
             )
         } else {
             Box(Modifier.weight(1f)) {

@@ -289,7 +289,7 @@ fun ThemeColorPicker(
 
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "整套主题由这一个颜色派生 —— 纸色是它的极淡版本，墨色是极深版本。",
+            text = "纸色与墨色都由这一个颜色派生",
             style = MaterialTheme.typography.bodySmall,
             color = colors.inkFaint
         )

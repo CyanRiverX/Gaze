@@ -148,7 +148,7 @@ fun StatsScreen(
                 StatsSection("阅读时长排行", icon = GazeIcons.History) {
                     if (data.topComics.isEmpty()) {
                         Text(
-                            text = "还没有统计数据。开始阅读后，这里会按停留时长排出最常读的漫画。",
+                            text = "开始阅读后，这里会按停留时长排最常读的漫画",
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.inkFaint,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
@@ -165,7 +165,7 @@ fun StatsScreen(
                 StatsSection("维护", icon = GazeIcons.Archive) {
                     ActionRow(
                         label = "清空统计数据",
-                        subtitle = "只删除阅读时长记录，不影响阅读进度、标签与收藏"
+                        subtitle = "只删除阅读时长记录，不影响进度、标签与收藏"
                     ) { confirmClear = true }
                 }
 
@@ -188,8 +188,8 @@ fun StatsScreen(
             title = { Text("清空阅读统计？") },
             text = {
                 Text(
-                    "将删除全部阅读时长与会话记录。\n" +
-                        "阅读进度、标签、收藏都不会受影响。",
+                    "将删除全部阅读时长与会话记录\n" +
+                        "阅读进度、标签、收藏都不会受影响",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },

@@ -253,7 +253,7 @@ fun LibraryScreen(
                 state.folders.isEmpty() && state.comics.isEmpty() && state.groups.isEmpty() ->
                     EmptyState(
                         title = "书架还是空的",
-                        message = "授权一个或多个文件夹，Gaze 会自动扫描其中的漫画。\n不需要逐个添加文件。",
+                        message = "授权一个或多个文件夹，Gaze 会自动扫描其中的漫画\n不需要逐个添加文件",
                         primaryLabel = "授权文件夹",
                         onPrimary = onAddFolder
                     )
@@ -263,9 +263,9 @@ fun LibraryScreen(
                         EmptyState(
                             title = if (state.view == LibraryView.FOLDER) "还没有文件夹" else "还没有标签",
                             message = if (state.view == LibraryView.FOLDER)
-                                "授权文件夹并扫描之后，同一个目录下的漫画会收进一个书架文件夹。"
+                                "授权文件夹并扫描之后，同一个目录下的漫画会收进一个书架文件夹"
                             else
-                                "给漫画加上标签之后，同一个标签下的漫画会收进一个书架文件夹。"
+                                "给漫画加上标签之后，同一个标签下的漫画会收进一个书架文件夹"
                         )
                     } else {
                         GroupGrid(
@@ -285,9 +285,9 @@ fun LibraryScreen(
                             "没有匹配的结果"
                         },
                         message = when {
-                            state.query.isNotBlank() -> "换个关键词试试 —— 可以搜标题、作者、标签或文件名。"
-                            state.view == LibraryView.FAVORITE -> "在书架里长按选中漫画，然后点「收藏」。"
-                            else -> "已授权的文件夹里没有找到可读的漫画文件。"
+                            state.query.isNotBlank() -> "换个关键词试试，可以搜标题、作者、标签或文件名"
+                            state.view == LibraryView.FAVORITE -> "在书架里长按选中漫画，然后点「收藏」"
+                            else -> "已授权的文件夹里没有找到可读的漫画文件"
                         },
                         secondaryLabel = if (state.query.isBlank()) "重新扫描" else "清空搜索",
                         onSecondary = {
@@ -674,7 +674,7 @@ private fun GroupCoverDialog(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    "从「${group.title}」里挑一本作为封面。",
+                    "从「${group.title}」里挑一本作为封面",
                     style = MaterialTheme.typography.bodySmall,
                     color = gazeColors.inkFaint
                 )
@@ -1176,26 +1176,25 @@ private fun SearchRow(
             text = {
                 Column {
                     Text(
-                        "搜索会同时看标题、作者、标签和文件名，命中任意一处就算找到。",
+                        "搜索会同时看标题、作者、标签和文件名，命中任意一处就算找到",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        "想同时按多个要素找，用空格把它们分开。",
+                        "想同时按多个要素找，用空格把它们分开",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "比如输入「恋爱 完结」，只有同时满足这两条的漫画才会出现；" +
-                            "输入「某个标签 作者名」也一样 —— 空格越多，范围越窄。",
+                        "比如输入「恋爱 完结」，只有同时满足这两条的漫画才会出现",
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.inkFaint
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        "想找某个标签下的全部漫画，直接输入标签名即可。",
+                        "想找某个标签下的全部漫画，直接输入标签名即可",
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.inkFaint
                     )

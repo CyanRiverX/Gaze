@@ -104,7 +104,7 @@ fun GazeTagPicker(
 
                 if (allTags.isEmpty()) {
                     Text(
-                        "还没有标签。在下面输入一个名字就能新建。",
+                        "还没有标签，在下面输入一个名字就能新建",
                         style = MaterialTheme.typography.bodySmall,
                         color = gazeColors.inkFaint
                     )

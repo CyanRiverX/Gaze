@@ -201,7 +201,7 @@ class MissingViewModel(private val container: AppContainer) : ViewModel() {
                                     append("合并 ${progress.merged} 条重复记录")
                                 }
                             }
-                            else -> "扫描完成：没有找到能自动接回的文件，试试手动重新定位"
+                            else -> "没找到能自动接回的文件，试试手动重新定位"
                         }
                         delay(1_200)
                         _scan.value = null

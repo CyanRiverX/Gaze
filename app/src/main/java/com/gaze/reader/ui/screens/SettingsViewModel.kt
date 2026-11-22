@@ -213,7 +213,7 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
             container.folderRepository.remove(uri)
             // 取消授权后，该目录下的漫画标记为失效（**不删除**任何数据）
             container.comicRepository.setMissingByUriPrefix(uri.substringBeforeLast("/document/"), true)
-            _message.value = "已取消授权。已导入的漫画不会删除，只是不再自动扫描。"
+            _message.value = "已取消授权，已导入的漫画不会删除，只是不再自动扫描"
         }
     }
 

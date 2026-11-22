@@ -293,7 +293,7 @@ fun DetailScreen(
 
             Spacer(Modifier.height(20.dp))
             SectionHeader("文件")
-            DetailAction("编辑书名与作者", "手动修改后，重新扫描不会覆盖") { showRename = true }
+            DetailAction("编辑书名与作者", "重新扫描不会覆盖") { showRename = true }
             Hairline(Modifier.padding(start = 20.dp))
             DetailAction("编辑详细信息", "系列、卷号与备注") { showMetadata = true }
             Hairline(Modifier.padding(start = 20.dp))
@@ -360,7 +360,7 @@ fun DetailScreen(
             Box(Modifier.width(2.dp).height(14.dp).background(colors.accent))
             Spacer(Modifier.width(10.dp))
             Text(
-                text = "已从书架移除（原文件未删除）",
+                text = "已从书架移除，原文件未删除",
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.ink,
                 modifier = Modifier.weight(1f)
@@ -434,7 +434,7 @@ fun DetailScreen(
             text = {
                 Text(
                     "只会移除 Gaze 里的记录（阅读进度与标签也会一并清除）。\n" +
-                        "原始漫画文件不会被删除。",
+                        "原始漫画文件不会被删除",
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
@@ -697,7 +697,7 @@ private fun TagPickerDialog(
             Column {
                 if (allTags.isEmpty()) {
                     Text(
-                        "还没有标签。在下面输入一个名字就能新建。",
+                        "还没有标签，在下面输入一个名字就能新建",
                         style = MaterialTheme.typography.bodySmall,
                         color = gazeColors.inkFaint
                     )
@@ -804,7 +804,7 @@ private fun RenameDialog(
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "手动填写后，重新扫描不会覆盖这两个字段。",
+                    "手动填写后，重新扫描不会覆盖这两个字段",
                     style = MaterialTheme.typography.bodySmall,
                     color = gazeColors.inkFaint
                 )
@@ -877,7 +877,7 @@ private fun MetadataDialog(
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "这些字段不会被扫描覆盖，也不影响文件名解析。",
+                    "这些字段不会被扫描覆盖，也不影响文件名解析",
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.inkFaint
                 )
